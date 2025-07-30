@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: astro-config
+data:
+  APP_NAME: "Astro Agent"
+  ADMIN_EMAIL: "xxxxx"
+  POSTGRES_DB: xxxxxx
+  DATABASE_HOST: xxxxxxx
+  DATABASE_PORT: "xxxx"
+  APP_ENV: development # or production

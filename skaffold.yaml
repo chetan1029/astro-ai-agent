@@ -1,0 +1,25 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: astro-agent
+
+build:
+  local:
+    push: false
+  artifacts:
+    - image: astro-agent
+      context: .
+      docker:
+        dockerfile: Dockerfile
+
+manifests:
+  rawYaml:
+    - k8s/app/deployment.yaml
+    - k8s/app/service.yaml
+    - k8s/shared/configmap.yaml
+    - k8s/shared/secret.yaml
+    - k8s/postgres/deployment.yaml
+    - k8s/postgres/service.yaml
+
+deploy:
+  kubectl: {}

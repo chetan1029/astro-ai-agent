@@ -1,0 +1,3 @@
+k8s/shared/configmap.yaml
+k8s/shared/secret.yaml
+.venv
