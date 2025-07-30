@@ -1,11 +1,10 @@
-import uuid
 import logging
 from datetime import datetime
 from typing import Dict, Any
 
 import swisseph as swe
 
-from app.src.core.utils import (
+from app.src.core.constant import (
     NAKSHATRAS,
     NAKSHATRA_RULERS,
     VIMSHOTTARI_ORDER,

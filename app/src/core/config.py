@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     database_port: int = 5432
     postgres_user: str
     postgres_password: str
+    google_api_key: str
 
     @property
     def database_url(self) -> str:

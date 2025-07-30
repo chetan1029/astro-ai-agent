@@ -18,6 +18,7 @@ manifests:
     - k8s/app/service.yaml
     - k8s/shared/configmap.yaml
     - k8s/shared/secret.yaml
+    - k8s/postgres/pvc.yaml
     - k8s/postgres/deployment.yaml
     - k8s/postgres/service.yaml
 

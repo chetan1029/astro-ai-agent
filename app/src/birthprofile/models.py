@@ -4,7 +4,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator, confloat
 
-from app.src.core.utils import convert_to_utc
+from app.src.core.utils import convert_to_utc, get_lat_long_by_address
 
 
 class Relationship(StrEnum):
@@ -18,8 +18,10 @@ class Relationship(StrEnum):
     partner = "Partner"
     other = "Other"
 
+
 Latitude = confloat(ge=-90.0, le=90.0)
 Longitude = confloat(ge=-180.0, le=180.0)
+
 
 class BirthProfile(BaseModel):
     name: str
@@ -27,8 +29,8 @@ class BirthProfile(BaseModel):
     date_of_birth_utc: datetime | None = None
     birth_place: str
     relationship: Relationship
-    birth_place_latitude: Latitude
-    birth_place_longitude: Longitude
+    birth_place_latitude: Latitude | None = None
+    birth_place_longitude: Longitude | None = None
 
     @field_validator("date_of_birth", mode="after")
     def validate_and_normalize_dob(cls, v: datetime) -> datetime:
@@ -50,7 +52,15 @@ class BirthProfile(BaseModel):
 
 class BirthProfileCreate(BirthProfile):
     @model_validator(mode="after")
-    def set_utc_birth_datetime(self):
+    def set_utc_birth_datetime_and_lat_long(self):
+        # Fetch lat/long if missing
+        if self.birth_place_latitude is None or self.birth_place_longitude is None:
+            address, lat, lon = get_lat_long_by_address(self.birth_place)
+            self.birth_place = address
+            self.birth_place_latitude = lat
+            self.birth_place_longitude = lon
+
+        # Date of Birth in UTC
         self.date_of_birth_utc = convert_to_utc(
             self.date_of_birth,
             self.birth_place_latitude,

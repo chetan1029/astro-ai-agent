@@ -1,7 +1,14 @@
+from typing import Tuple
+
+from geopy import GoogleV3
+from geopy.exc import GeocoderServiceError
 from timezonefinder import TimezoneFinder
 from zoneinfo import ZoneInfo
 from datetime import datetime
+from app.src.core.config import get_settings
 
+
+GOOGLE_API_KEY = get_settings().google_api_key
 
 def convert_to_utc(dob_local: datetime, lat: float, lon: float) -> datetime:
     tf = TimezoneFinder()
@@ -11,91 +18,12 @@ def convert_to_utc(dob_local: datetime, lat: float, lon: float) -> datetime:
     return local_dt.astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
 
 
-NAKSHATRAS = [
-    "Ashwini",
-    "Bharani",
-    "Krittika",
-    "Rohini",
-    "Mrigashira",
-    "Ardra",
-    "Punarvasu",
-    "Pushya",
-    "Ashlesha",
-    "Magha",
-    "Purva Phalguni",
-    "Uttara Phalguni",
-    "Hasta",
-    "Chitra",
-    "Swati",
-    "Vishakha",
-    "Anuradha",
-    "Jyeshta",
-    "Mula",
-    "Purva Ashadha",
-    "Uttara Ashadha",
-    "Shravana",
-    "Dhanishta",
-    "Shatabhisha",
-    "Purva Bhadrapada",
-    "Uttara Bhadrapada",
-    "Revati",
-]
-
-NAKSHATRA_RULERS = {
-    "Ashwini": "Ketu",
-    "Bharani": "Venus",
-    "Krittika": "Sun",
-    "Rohini": "Moon",
-    "Mrigashira": "Mars",
-    "Ardra": "Rahu",
-    "Punarvasu": "Jupiter",
-    "Pushya": "Saturn",
-    "Ashlesha": "Mercury",
-    "Magha": "Ketu",
-    "Purva Phalguni": "Venus",
-    "Uttara Phalguni": "Sun",
-    "Hasta": "Moon",
-    "Chitra": "Mars",
-    "Swati": "Rahu",
-    "Vishakha": "Jupiter",
-    "Anuradha": "Saturn",
-    "Jyeshta": "Mercury",
-    "Mula": "Ketu",
-    "Purva Ashadha": "Venus",
-    "Uttara Ashadha": "Sun",
-    "Shravana": "Moon",
-    "Dhanishta": "Mars",
-    "Shatabhisha": "Rahu",
-    "Purva Bhadrapada": "Jupiter",
-    "Uttara Bhadrapada": "Saturn",
-    "Revati": "Mercury",
-}
-
-VIMSHOTTARI_ORDER = [
-    "Ketu",
-    "Venus",
-    "Sun",
-    "Moon",
-    "Mars",
-    "Rahu",
-    "Jupiter",
-    "Saturn",
-    "Mercury",
-]
-
-VIMSHOTTARI_YEARS = {
-    "Ketu": 7,
-    "Venus": 20,
-    "Sun": 6,
-    "Moon": 10,
-    "Mars": 7,
-    "Rahu": 18,
-    "Jupiter": 16,
-    "Saturn": 19,
-    "Mercury": 17,
-}
-
-ZODIAC_SIGNS = [
-    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
-]
+def get_lat_long_by_address(address: str) -> Tuple[str, float, float]:
+    try:
+        geolocator = GoogleV3(api_key=GOOGLE_API_KEY, timeout=10)
+        location = geolocator.geocode(address)
+        if location:
+            return location.address, location.latitude, location.longitude
+        raise ValueError(f"Could not geocode address: {address}")
+    except GeocoderServiceError as e:
+        raise RuntimeError(f"Geocoding service failed: {e}")
