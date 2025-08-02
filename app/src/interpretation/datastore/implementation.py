@@ -1,6 +1,7 @@
 import uuid
 import logging
 
+from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -55,10 +56,6 @@ class InterpretationImplementation(InterpretationDataStore):
             await self.session.rollback()
             raise DataStoreError("Failed to create interpretation") from db_error
 
-        except Exception as e:
-            logger.exception("Unexpected error while creating interpretation")
-            raise DataStoreError("Unexpected error occurred") from e
-
     async def fetch_interpretation(
         self, birth_profile_id: uuid.UUID
     ) -> InterpretationResponse:
@@ -68,6 +65,15 @@ class InterpretationImplementation(InterpretationDataStore):
             )
             result = await self.session.execute(statement)
             interpretation = result.scalar_one_or_none()
+
+            if not interpretation:
+                raise InterpretationNotFoundError(
+                    "Interpretation not found with birth profile ID: {}".format(
+                        birth_profile_id
+                    )
+                )
+            return InterpretationResponse.model_validate(interpretation)
+
         except SQLAlchemyError as db_error:
             logger.exception(
                 "Database error occurred while fetching interpretation with ID: {}".format(
@@ -77,22 +83,15 @@ class InterpretationImplementation(InterpretationDataStore):
             await self.session.rollback()
             raise DataStoreError("Failed to fetch interpretation") from db_error
 
-        if not interpretation:
-            raise InterpretationNotFoundError(
-                "Interpretation not found with birth profile ID: {}".format(
-                    birth_profile_id
-                )
-            )
-
-        try:
-            return InterpretationResponse.model_validate(interpretation)
-        except Exception as e:
+        except ValidationError as e:
             logger.exception(
-                "Unexpected error while fetching interpretation with birth profile ID: {}".format(
+                "Validation error while fetching interpretation with birth profile ID: {}".format(
                     birth_profile_id
                 )
             )
-            raise DataStoreError("Unexpected error occurred") from e
+            raise DataStoreError(
+                "Validation error while fetching interpretation"
+            ) from e
 
     async def delete_interpretation(self, birth_profile_id: uuid.UUID) -> None:
         try:
@@ -122,12 +121,3 @@ class InterpretationImplementation(InterpretationDataStore):
             raise DataStoreError(
                 "Failed to delete astro profile with ID: {}".format(birth_profile_id)
             ) from db_error
-
-        except Exception as e:
-            await self.session.rollback()
-            logger.exception(
-                "Unexpected error while deleting astro profile ID: {}".format(
-                    birth_profile_id
-                )
-            )
-            raise DataStoreError("Unexpected error occurred") from e

@@ -1,6 +1,7 @@
 import uuid
 import logging
 
+from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -54,10 +55,6 @@ class HoroscopeImplementation(HoroscopeDataStore):
             await self.session.rollback()
             raise DataStoreError("Failed to create horoscope") from db_error
 
-        except Exception as e:
-            logger.exception("Unexpected error while creating horoscope")
-            raise DataStoreError("Unexpected error occurred") from e
-
     async def fetch_horoscope(
         self, birth_profile_id: uuid.UUID
     ) -> HoroscopeResponse:
@@ -67,6 +64,14 @@ class HoroscopeImplementation(HoroscopeDataStore):
             )
             result = await self.session.execute(statement)
             horoscope = result.scalar_one_or_none()
+
+            if not horoscope:
+                raise HoroscopeNotFoundError(
+                    "Horoscope not found with birth profile ID: {}".format(
+                        birth_profile_id
+                    )
+                )
+            return HoroscopeResponse.model_validate(horoscope)
         except SQLAlchemyError as db_error:
             logger.exception(
                 "Database error occurred while fetching horoscope with ID: {}".format(
@@ -76,22 +81,13 @@ class HoroscopeImplementation(HoroscopeDataStore):
             await self.session.rollback()
             raise DataStoreError("Failed to fetch horoscope") from db_error
 
-        if not horoscope:
-            raise HoroscopeNotFoundError(
-                "Horoscope not found with birth profile ID: {}".format(
-                    birth_profile_id
-                )
-            )
-
-        try:
-            return HoroscopeResponse.model_validate(horoscope)
-        except Exception as e:
+        except ValidationError as e:
             logger.exception(
-                "Unexpected error while fetching horoscope with birth profile ID: {}".format(
+                "Validation error while fetching horoscope with birth profile ID: {}".format(
                     birth_profile_id
                 )
             )
-            raise DataStoreError("Unexpected error occurred") from e
+            raise DataStoreError("Validation error while fetching horoscope") from e
 
 
     async def delete_horoscope(self, birth_profile_id: uuid.UUID) -> None:
@@ -123,11 +119,3 @@ class HoroscopeImplementation(HoroscopeDataStore):
                 "Failed to delete astro profile with ID: {}".format(birth_profile_id)
             ) from db_error
 
-        except Exception as e:
-            await self.session.rollback()
-            logger.exception(
-                "Unexpected error while deleting astro profile ID: {}".format(
-                    birth_profile_id
-                )
-            )
-            raise DataStoreError("Unexpected error occurred") from e

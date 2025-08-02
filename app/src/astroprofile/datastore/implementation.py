@@ -1,6 +1,7 @@
 import logging
 import uuid
 
+from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -55,9 +56,6 @@ class AstroProfileImplementation(AstroProfileDataStore):
             await self.session.rollback()
             raise DataStoreError("Failed to create astro profile") from db_error
 
-        except Exception as e:
-            logger.exception("Unexpected error while creating astro profile")
-            raise DataStoreError("Unexpected error occurred") from e
 
     async def fetch_astro_profile(
         self, birth_profile_id: uuid.UUID
@@ -68,6 +66,14 @@ class AstroProfileImplementation(AstroProfileDataStore):
             )
             result = await self.session.execute(statement)
             astro_profile = result.scalar_one_or_none()
+
+            if not astro_profile:
+                raise AstroProfileNotFoundError(
+                    "AstroProfile not found with birth profile ID: {}".format(
+                        birth_profile_id
+                    )
+                )
+            return AstroProfileResponse.model_validate(astro_profile)
         except SQLAlchemyError as db_error:
             logger.exception(
                 "Database error occurred while fetching astro profile with ID: {}".format(
@@ -77,22 +83,13 @@ class AstroProfileImplementation(AstroProfileDataStore):
             await self.session.rollback()
             raise DataStoreError("Failed to fetch astro profile") from db_error
 
-        if not astro_profile:
-            raise AstroProfileNotFoundError(
-                "AstroProfile not found with birth profile ID: {}".format(
-                    birth_profile_id
-                )
-            )
-
-        try:
-            return AstroProfileResponse.model_validate(astro_profile)
-        except Exception as e:
+        except ValidationError as e:
             logger.exception(
-                "Unexpected error while fetching astro profile with ID: {}".format(
+                "Validation error while fetching astro profile with birth profile ID: {}".format(
                     birth_profile_id
                 )
             )
-            raise DataStoreError("Unexpected error occurred") from e
+            raise DataStoreError("Validation error while fetching astro profile") from e
 
     async def delete_astro_profile(self, birth_profile_id: uuid.UUID) -> None:
         try:
@@ -122,12 +119,3 @@ class AstroProfileImplementation(AstroProfileDataStore):
             raise DataStoreError(
                 "Failed to delete astro profile with ID: {}".format(birth_profile_id)
             ) from db_error
-
-        except Exception as e:
-            await self.session.rollback()
-            logger.exception(
-                "Unexpected error while deleting astro profile ID: {}".format(
-                    birth_profile_id
-                )
-            )
-            raise DataStoreError("Unexpected error occurred") from e

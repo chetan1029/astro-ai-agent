@@ -1,6 +1,7 @@
 import uuid
 import logging
 
+from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,15 +39,18 @@ class BirthProfileImplementation(BirthProfileDataStore):
             await self.session.rollback()
             raise DataStoreError("Failed to create birth profile") from db_error
 
-        except Exception as e:
-            logger.exception("Unexpected error while creating birth profile")
-            raise DataStoreError("Unexpected error occurred") from e
-
     async def fetch_birth_profile(
         self, birth_profile_id: uuid.UUID
     ) -> BirthProfileResponse:
         try:
             birth_profile = await self.session.get(BirthProfile, birth_profile_id)
+
+            if not birth_profile:
+                raise BirthProfileNotFoundError(
+                    f"BirthProfile not found with profile ID: {birth_profile_id}"
+                )
+            return BirthProfileResponse.model_validate(birth_profile)
+
         except SQLAlchemyError as db_error:
             logger.exception(
                 "Database error occurred while fetching birth profile with ID: {}".format(
@@ -56,20 +60,13 @@ class BirthProfileImplementation(BirthProfileDataStore):
             await self.session.rollback()
             raise DataStoreError("Failed to fetch birth profile") from db_error
 
-        if not birth_profile:
-            raise BirthProfileNotFoundError(
-                "BirthProfile not found with profile ID: {}".format(birth_profile_id)
-            )
-
-        try:
-            return BirthProfileResponse.model_validate(birth_profile)
-        except Exception as e:
+        except ValidationError as error:
             logger.exception(
-                "Unexpected error while fetching birth profile with ID: {}".format(
+                "Validation error while fetching birth profile with ID".format(
                     birth_profile_id
                 )
             )
-            raise DataStoreError("Unexpected error occurred") from e
+            raise DataStoreError("Validation error while fetching birth profile") from error
 
     async def delete_birth_profile(self, birth_profile_id: uuid.UUID) -> None:
         try:
@@ -95,12 +92,3 @@ class BirthProfileImplementation(BirthProfileDataStore):
             raise DataStoreError(
                 "Failed to delete profile with ID: {}".format(birth_profile_id)
             ) from db_error
-
-        except Exception as e:
-            await self.session.rollback()
-            logger.exception(
-                "Unexpected error while deleting profile ID: {}".format(
-                    birth_profile_id
-                )
-            )
-            raise DataStoreError("Unexpected error occurred") from e
