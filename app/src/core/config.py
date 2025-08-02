@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
+
 class Settings(BaseSettings):
     app_name: str
     app_env: str
@@ -12,10 +13,17 @@ class Settings(BaseSettings):
     postgres_user: str
     postgres_password: str
     google_api_key: str
+    openai_api_key: str
+    anyllm_provider: str
+    anyllm_model: str
 
     @property
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.database_host}:{self.database_port}/{self.postgres_db}"
+
+    @property
+    def anyllm_model_url(self) -> str:
+        return f"{self.anyllm_provider}/{self.anyllm_model}"
 
 
 @lru_cache

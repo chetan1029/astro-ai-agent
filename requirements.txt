@@ -10,3 +10,4 @@ asyncpg
 timezonefinder
 pyswisseph
 geopy
+any-llm-sdk[openai]

@@ -42,7 +42,7 @@ class AstroProfileImplementation(AstroProfileDataStore):
             return AstroProfileResponse.model_validate(astro_profile_db)
 
         except IntegrityError as db_error:
-            logger.exception("Database error occurred while creating astro profile")
+            logger.exception("Astro Profile already exists with profile id {}".format(birth_profile_id))
             await self.session.rollback()
             raise AstroProfileAlreadyExistsError(
                 "Astro profile already exists with profile id {}".format(
@@ -51,12 +51,12 @@ class AstroProfileImplementation(AstroProfileDataStore):
             ) from db_error
 
         except SQLAlchemyError as db_error:
-            logger.exception("Database error occurred while creating birth profile")
+            logger.exception("Database error occurred while creating astro profile")
             await self.session.rollback()
             raise DataStoreError("Failed to create astro profile") from db_error
 
         except Exception as e:
-            logger.exception("Unexpected error while creating birth profile")
+            logger.exception("Unexpected error while creating astro profile")
             raise DataStoreError("Unexpected error occurred") from e
 
     async def fetch_astro_profile(

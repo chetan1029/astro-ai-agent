@@ -2,7 +2,6 @@ import uuid
 
 from fastapi import APIRouter, Depends, status, HTTPException
 
-from app.src.astroprofile.logic import AstroProfileLogic
 from app.src.birthprofile.exceptions import BirthProfileNotFoundError, DataStoreError
 from app.src.birthprofile.models import BirthProfileResponse, BirthProfileCreate
 from app.src.birthprofile.service import BirthProfileService

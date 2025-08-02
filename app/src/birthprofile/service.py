@@ -1,8 +1,6 @@
 import uuid
 import logging
 
-from app.src.astroprofile.exceptions import AstroProfileAlreadyExistsError
-from app.src.astroprofile.service import AstroProfileService
 from app.src.birthprofile.datastore.implementation import BirthProfileImplementation
 from app.src.birthprofile.models import BirthProfileResponse, BirthProfileCreate
 

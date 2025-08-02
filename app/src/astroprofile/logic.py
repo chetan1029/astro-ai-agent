@@ -25,47 +25,50 @@ class AstroProfileLogic:
         birth_place_latitude: float,
         birth_place_longitude: float,
     ) -> Dict[str, Any]:
-        swe.set_ephe_path(None)
+        try:
+            swe.set_ephe_path(None)
 
-        jd = swe.julday(
-            date_of_birth_utc.year,
-            date_of_birth_utc.month,
-            date_of_birth_utc.day,
-            date_of_birth_utc.hour
-            + date_of_birth_utc.minute / 60.0
-            + date_of_birth_utc.second / 3600.0,
-        )
+            jd = swe.julday(
+                date_of_birth_utc.year,
+                date_of_birth_utc.month,
+                date_of_birth_utc.day,
+                date_of_birth_utc.hour
+                + date_of_birth_utc.minute / 60.0
+                + date_of_birth_utc.second / 3600.0,
+            )
 
-        # Ayanamsa for sidereal calculation
-        ayanamsa = swe.get_ayanamsa(jd)
+            # Ayanamsa for sidereal calculation
+            ayanamsa = swe.get_ayanamsa(jd)
 
-        # Planet Positions
-        planets = self._get_sidereal_planet_positions(jd, ayanamsa)
+            # Planet Positions
+            planets = self._get_sidereal_planet_positions(jd, ayanamsa)
 
-        # Ascendant and Houses
-        ascendant, houses = self._get_lagna_and_houses(
-            jd, birth_place_latitude, birth_place_longitude
-        )
+            # Ascendant and Houses
+            ascendant, houses = self._get_lagna_and_houses(
+                jd, birth_place_latitude, birth_place_longitude
+            )
 
-        # Nakshatra + Ruler
-        moon_deg = planets["Moon"]
-        nakshatra, ruler = self._get_nakshatra_and_ruler(moon_deg)
+            # Nakshatra + Ruler
+            moon_deg = planets["Moon"]
+            nakshatra, ruler = self._get_nakshatra_and_ruler(moon_deg)
 
-        # Vimshottari Dasha (basic placeholder — expand later)
-        dasha_periods = self._get_dasha_periods(moon_deg, date_of_birth_utc)
+            # Vimshottari Dasha (basic placeholder — expand later)
+            dasha_periods = self._get_dasha_periods(moon_deg, date_of_birth_utc)
 
-        return {
-            "planet_positions": planets,
-            "ascendant": round(ascendant, 2),
-            "houses": houses,
-            "moon_nakshatra": nakshatra,
-            "nakshatra_ruler": ruler,
-            "vimshottari_dasha": dasha_periods,
-        }
+            return {
+                "planet_positions": planets,
+                "ascendant": round(ascendant, 2),
+                "houses": houses,
+                "moon_nakshatra": nakshatra,
+                "nakshatra_ruler": ruler,
+                "vimshottari_dasha": dasha_periods,
+            }
+        except Exception as e:
+            logger.exception("Error generating astro profile")
+            raise e
 
-    def _get_sidereal_planet_positions(
-        self, jd: float, ayanamsa: float
-    ) -> Dict[str, float]:
+    @staticmethod
+    def _get_sidereal_planet_positions(jd: float, ayanamsa: float) -> Dict[str, float]:
         planet_names = [
             "Sun",
             "Moon",
@@ -100,89 +103,83 @@ class AstroProfileLogic:
 
         return positions
 
-    def _degree_to_sign(self, degree: float) -> str:
+    @staticmethod
+    def _degree_to_sign(degree: float) -> str:
         sign_index = int(degree // 30) % 12
         deg_in_sign = degree % 30
         return f"{round(deg_in_sign, 2)}° {ZODIAC_SIGNS[sign_index]}"
 
-    def _get_lagna_and_houses(
-        self, jd: float, lat: float, lon: float
-    ) -> tuple[float, list]:
-        # 'W' → Whole Sign, 'P' → Placidus (use 'W' for Vedic)
-        asc, house_deg = swe.houses(jd, lat, lon, b"W")
+    @staticmethod
+    def _get_lagna_and_houses(jd: float, lat: float, lon: float) -> tuple[float, list]:
+        try:
+            # 'W' → Whole Sign, 'P' → Placidus (use 'W' for Vedic)
+            asc, house_deg = swe.houses(jd, lat, lon, b"W")
 
-        formatted_houses = [
-            {"house": i + 1, "starts_at": self._degree_to_sign(house_deg)}
-            for i, house_deg in enumerate(house_deg)
-        ]
+            formatted_houses = [
+                {
+                    "house": i + 1,
+                    "starts_at": AstroProfileLogic._degree_to_sign(house_deg),
+                }
+                for i, house_deg in enumerate(house_deg)
+            ]
 
-        return asc[0], formatted_houses
+            return asc[0], formatted_houses
+        except Exception as e:
+            logger.exception("Error calculating ascendant/houses")
+            raise ValueError("Could not compute houses. Check input data.") from e
 
-    def _get_nakshatra_and_ruler(self, moon_deg: float) -> tuple[str, str]:
+    @staticmethod
+    def _get_nakshatra_and_ruler(moon_deg: float) -> tuple[str, str]:
         index = int(moon_deg // (360 / 27))
         nakshatra = NAKSHATRAS[index]
         ruler = NAKSHATRA_RULERS[nakshatra]
         return nakshatra, ruler
 
-    def _get_dasha_periods1(self, moon_deg: float, dob: datetime) -> Dict[str, Any]:
-        # Placeholder: use nakshatra + elapsed portion to compute Mahadasha/Antardasha
-        # For now, return just ruling planet and nakshatra span
-        nak_index = int(moon_deg // (360 / 27))
-        nak_start = nak_index * (360 / 27)
-        progress_in_nakshatra = moon_deg - nak_start
-        percent = round((progress_in_nakshatra / (360 / 27)) * 100, 2)
-        ruler = NAKSHATRA_RULERS[NAKSHATRAS[nak_index]]
+    @staticmethod
+    def _get_dasha_periods(moon_deg: float, dob: datetime) -> Dict[str, Any]:
+        try:
+            nak_index = int(moon_deg // (360 / 27))
+            nak_start = nak_index * (360 / 27)
+            nakshatra = NAKSHATRAS[nak_index]
+            ruling_planet = NAKSHATRA_RULERS[nakshatra]
 
-        return {
-            "starting_ruler": ruler,
-            "nakshatra_progress": f"{percent}%",
-            "note": "Use this to initialize Mahadasha periods",
-        }
+            # Get how far Moon is inside current Nakshatra (in degrees)
+            degrees_into_nak = moon_deg - nak_start
+            portion_completed = degrees_into_nak / (360 / 27)  # portion (0 to 1)
 
-    def _get_dasha_periods(self, moon_deg: float, dob: datetime) -> Dict[str, Any]:
-        nak_index = int(moon_deg // (360 / 27))
-        nak_start = nak_index * (360 / 27)
-        nakshatra = NAKSHATRAS[nak_index]
-        ruling_planet = NAKSHATRA_RULERS[nakshatra]
+            total_dasha_years = VIMSHOTTARI_YEARS[ruling_planet]
+            elapsed_years = portion_completed * total_dasha_years
+            remaining_years = total_dasha_years - elapsed_years
 
-        # Get how far Moon is inside current Nakshatra (in degrees)
-        degrees_into_nak = moon_deg - nak_start
-        portion_completed = degrees_into_nak / (360 / 27)  # portion (0 to 1)
+            # Build Mahadasha timeline (starting from birth)
+            start_index = VIMSHOTTARI_ORDER.index(ruling_planet)
+            timeline = []
+            start_date = dob
 
-        total_dasha_years = VIMSHOTTARI_YEARS[ruling_planet]
-        elapsed_years = portion_completed * total_dasha_years
-        remaining_years = total_dasha_years - elapsed_years
+            for i in range(len(VIMSHOTTARI_ORDER)):
+                planet = VIMSHOTTARI_ORDER[(start_index + i) % len(VIMSHOTTARI_ORDER)]
+                dasha_years = VIMSHOTTARI_YEARS[planet]
 
-        # Build Mahadasha timeline (starting from birth)
-        start_index = VIMSHOTTARI_ORDER.index(ruling_planet)
-        timeline = []
-        start_date = dob
+                # Handle the first planet: subtract elapsed years
+                if i == 0:
+                    years = remaining_years
+                else:
+                    years = dasha_years
 
-        for i in range(len(VIMSHOTTARI_ORDER)):
-            planet = VIMSHOTTARI_ORDER[(start_index + i) % len(VIMSHOTTARI_ORDER)]
-            dasha_years = VIMSHOTTARI_YEARS[planet]
+                end_date = start_date.replace(year=int(start_date.year + years))
+                timeline.append(
+                    {
+                        "planet": planet,
+                        "start_date": start_date.strftime("%Y-%m-%d"),
+                        "end_date": end_date.strftime("%Y-%m-%d"),
+                        "years": round(years, 2),
+                    }
+                )
+                start_date = end_date
 
-            # Handle the first planet: subtract elapsed years
-            if i == 0:
-                years = remaining_years
-            else:
-                years = dasha_years
-
-            end_date = start_date.replace(year=int(start_date.year + years))
-            timeline.append(
-                {
-                    "planet": planet,
-                    "start_date": start_date.strftime("%Y-%m-%d"),
-                    "end_date": end_date.strftime("%Y-%m-%d"),
-                    "years": round(years, 2),
-                }
-            )
-            start_date = end_date
-
-        return {
-            "moon_nakshatra": nakshatra,
-            "ruling_planet": ruling_planet,
-            "elapsed_years": round(elapsed_years, 2),
-            "remaining_years": round(remaining_years, 2),
-            "timeline": timeline,
-        }
+            return {
+                "timeline": timeline,
+            }
+        except Exception as e:
+            logger.exception("Error computing Dasha periods")
+            raise ValueError("Could not compute Vimshottari Dasha periods.") from e

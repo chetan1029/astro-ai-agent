@@ -2,6 +2,8 @@ from fastapi import APIRouter
 from app.src.birthprofile.api import router as birthprofile_router
 from app.src.healthcheck.api import router as healthcheck_router
 from app.src.astroprofile.api import router as astroprofile_router
+from app.src.interpretation.api import router as interpretation_router
+from app.src.horoscope.api import router as horoscope_router
 
 router = APIRouter()
 
@@ -10,5 +12,14 @@ router.include_router(
 )
 router.include_router(
     astroprofile_router, prefix="/astro-profile", tags=["AstroProfile"]
+)
+router.include_router(
+    interpretation_router, prefix="/interpretation", tags=["Interpretation"]
+)
+
+router.include_router(
+    horoscope_router,
+    prefix="/horoscope",
+    tags=["Horoscope"],
 )
 router.include_router(healthcheck_router, prefix="/healthcheck", tags=["HealthCheck"])
