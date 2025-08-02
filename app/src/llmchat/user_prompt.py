@@ -16,10 +16,11 @@ async def generate_user_interpretation_prompt(
     Current Mahadasha: {astro_profile.nakshatra_ruler}
     Planet Positions: {astro_profile.planet_positions}
 
-    Generate:
-    1. Personality analysis (Lagna + Moon traits)
-    2. Dasha Summary (focus of life now)
-    3. Horoscope of key planets
+    Please write:
+    1. A simple explanation of personality
+    2. What kind of energy or challenges the person is facing in life now
+    3. Key advice for their health, career, and relationships
+    4. One inspiring line about their future
     """
 
 
@@ -29,7 +30,7 @@ async def generate_user_horoscope_prompt(
     astro_profile: AstroProfileResponse,
 ) -> str:
     return f"""
-    Today is {today_date}. Based on the following details, generate a daily horoscope focused on career, health, and relationships.
+    Today is {today_date}. Please generate a short, friendly daily horoscope for this user.
 
     Name: {birth_profile.name}
     Date of Birth: {birth_profile.date_of_birth}
@@ -38,5 +39,10 @@ async def generate_user_horoscope_prompt(
     Moon Nakshatra: {astro_profile.moon_nakshatra} (ruled by {astro_profile.nakshatra_ruler})
     Current Mahadasha: {astro_profile.nakshatra_ruler}
 
-    Avoid specific transit predictions, just use Dasha influence and natal chart traits.
+    Focus on how the user may feel or experience today in:
+    - Career or money
+    - Health and energy
+    - Relationships or family
+
+    Use soft and positive tone. Avoid technical astrology language.
     """
