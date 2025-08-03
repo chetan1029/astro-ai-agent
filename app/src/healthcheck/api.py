@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy import text
 
-from app.src.core.db import get_session, async_session_maker
+from app.src.core.db import get_session
 
 router = APIRouter()
 
@@ -14,10 +14,9 @@ async def health_check():
 
 
 @router.get("/db", status_code=status.HTTP_200_OK)
-async def health_check_db():
+async def health_check_db(session: get_session = Depends(get_session)):
     try:
-        async with async_session_maker() as session:
-            await session.execute(text("SELECT 1"))
-            return {"status": "healthy", "database": "connected"}
+        await session.execute(text("SELECT 1"))
+        return {"status": "healthy", "database": "connected"}
     except Exception as e:
         raise HTTPException(status_code=503, detail="Database connection failed")

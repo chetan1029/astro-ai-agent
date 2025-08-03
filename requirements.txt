@@ -11,3 +11,6 @@ timezonefinder
 pyswisseph
 geopy
 any-llm-sdk[openai]
+requests
+pytest-asyncio
+testcontainers[postgres]

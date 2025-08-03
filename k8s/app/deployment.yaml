@@ -12,6 +12,11 @@ spec:
       labels:
         app: astro-agent
     spec:
+      volumes:
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
       initContainers:
         - name: wait-for-postgres
           image: busybox:1.36
@@ -41,3 +46,6 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 20
             failureThreshold: 5
+          volumeMounts:
+            - name: docker-sock
+              mountPath: /var/run/docker.sock

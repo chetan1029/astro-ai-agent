@@ -34,6 +34,11 @@ class BirthProfile(BaseModel):
 
     @field_validator("date_of_birth", mode="after")
     def validate_and_normalize_dob(cls, v: datetime) -> datetime:
+        if v.time() == datetime.min.time():
+            raise ValueError(
+                "Time component is required in date_of_birth (e.g. 1990-01-01T14:30:00)"
+            )
+
         v = v.astimezone(timezone.utc).replace(tzinfo=None)
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)

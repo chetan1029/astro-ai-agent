@@ -5,23 +5,33 @@ from typing import AsyncGenerator
 from sqlmodel import SQLModel
 from app.src.core.config import get_settings
 
+_engine = None
+_async_session_maker = None
 
-postgres_url = get_settings().database_url
-engine = create_async_engine(
-    postgres_url,
-    echo=True,
-    future=True,
-)
-async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+
+def get_session_maker():
+    global _async_session_maker
+    if _async_session_maker is None:
+        _async_session_maker = async_sessionmaker(get_engine(), expire_on_commit=False)
+    return _async_session_maker
+
+
+def get_engine():
+    global _engine
+    if _engine is None:
+        settings = get_settings()
+        _engine = create_async_engine(settings.database_url, echo=True, future=True)
+    return _engine
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    async_session_maker = get_session_maker()
     async with async_session_maker() as session:
         yield session
 
 
 async def init_db() -> None:
-    async with engine.begin() as conn:
+    async with get_engine().begin() as conn:
         from app.src.birthprofile.datastore.dbmodels import BirthProfile
         from app.src.astroprofile.datastore.dbmodel import AstroProfile
 
