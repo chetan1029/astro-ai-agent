@@ -9,3 +9,5 @@ data:
   DATABASE_HOST: xxxxxxx
   DATABASE_PORT: "xxxx"
   APP_ENV: development # or production
+  ANYLLM_PROVIDER: openai
+  ANYLLM_MODEL: gpt-4o-mini
