@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import Optional
 
 from sqlalchemy import UniqueConstraint
@@ -14,8 +14,8 @@ class Horoscope(SQLModel, table=True):
     )
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    birth_profile_id: uuid.UUID | None = Field(
-        default=None, foreign_key="birthprofile.id", index=True
+    birth_profile_id: uuid.UUID = Field(
+        foreign_key="birthprofile.id", index=True
     )
     scope_type: str = Field(index=True)
     scope_date: Optional[date] = Field(default=None)

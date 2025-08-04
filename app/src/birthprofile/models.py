@@ -32,26 +32,6 @@ class BirthProfile(BaseModel):
     birth_place_latitude: Latitude | None = None
     birth_place_longitude: Longitude | None = None
 
-    @field_validator("date_of_birth", mode="after")
-    def validate_and_normalize_dob(cls, v: datetime) -> datetime:
-        if v.time() == datetime.min.time():
-            raise ValueError(
-                "Time component is required in date_of_birth (e.g. 1990-01-01T14:30:00)"
-            )
-
-        v = v.astimezone(timezone.utc).replace(tzinfo=None)
-
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
-        hundred_years_ago = now - timedelta(days=365.25 * 100)
-
-        if v < hundred_years_ago:
-            raise ValueError("date_of_birth cannot be more than 100 years in the past")
-
-        if v > now:
-            raise ValueError("date_of_birth cannot be in the future")
-
-        return v
-
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -72,6 +52,26 @@ class BirthProfileCreate(BirthProfile):
             self.birth_place_longitude,
         )
         return self
+
+    @field_validator("date_of_birth", mode="after")
+    def validate_and_normalize_dob(cls, v: datetime) -> datetime:
+        if v.time() == datetime.min.time():
+            raise ValueError(
+                "Time component is required in date_of_birth (e.g. 1990-01-01T14:30:00)"
+            )
+
+        v = v.astimezone(timezone.utc).replace(tzinfo=None)
+
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        hundred_years_ago = now - timedelta(days=365.25 * 100)
+
+        if v < hundred_years_ago:
+            raise ValueError("date_of_birth cannot be more than 100 years in the past")
+
+        if v > now:
+            raise ValueError("date_of_birth cannot be in the future")
+
+        return v
 
 
 class BirthProfileResponse(BirthProfile):

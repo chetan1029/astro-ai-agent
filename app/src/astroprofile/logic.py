@@ -16,8 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 class AstroProfileLogic:
-    def __init__(self, session):
-        self.session = session
 
     async def get_astro_profile(
         self,

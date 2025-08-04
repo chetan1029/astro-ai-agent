@@ -1,6 +1,8 @@
 import uuid
 import logging
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.src.birthprofile.datastore.implementation import BirthProfileImplementation
 from app.src.birthprofile.models import BirthProfileResponse, BirthProfileCreate
 
@@ -8,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class BirthProfileService:
-    def __init__(self, session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
     async def get_birth_profile(

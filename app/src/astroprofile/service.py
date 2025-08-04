@@ -2,6 +2,8 @@ import uuid
 import logging
 from datetime import datetime
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.src.astroprofile.datastore.implementation import AstroProfileImplementation
 from app.src.astroprofile.logic import AstroProfileLogic
 from app.src.astroprofile.models import (
@@ -13,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class AstroProfileService:
-    def __init__(self, session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
     async def get_astro_profile(
@@ -40,7 +42,7 @@ class AstroProfileService:
         birth_place_latitude: float,
         birth_place_longitude: float,
     ) -> AstroProfileResponse:
-        raw_data = await AstroProfileLogic(self.session).get_astro_profile(
+        raw_data = await AstroProfileLogic().get_astro_profile(
             date_of_birth_utc, birth_place_latitude, birth_place_longitude
         )
 
