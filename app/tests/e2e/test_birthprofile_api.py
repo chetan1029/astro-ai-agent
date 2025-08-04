@@ -47,7 +47,7 @@ async def test_create_birth_profile(
 ):
     async with AsyncClient(base_url=BASE_URL) as client:
         response = await client.post(
-            "/birth-profile/",
+            ENDPOINT,
             json={
                 "name": name,
                 "date_of_birth": date_of_birth,

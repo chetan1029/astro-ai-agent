@@ -39,7 +39,7 @@ async def get_interpretation(
 
 @router.post(
     "/{birth_profile_id}",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     response_model=InterpretationResponse,
 )
 async def set_interpretation(

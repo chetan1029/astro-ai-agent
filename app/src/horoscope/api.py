@@ -39,7 +39,7 @@ async def get_horoscope(
 
 @router.post(
     "/{birth_profile_id}",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     response_model=HoroscopeResponse,
 )
 async def set_horoscope(
@@ -76,13 +76,9 @@ async def set_horoscope(
 
 
 @router.delete("/{birth_profile_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def remove_horoscope(
-    birth_profile_id: uuid.UUID, session=Depends(get_session)
-):
+async def remove_horoscope(birth_profile_id: uuid.UUID, session=Depends(get_session)):
     try:
-        return await HoroscopeService(session).remove_horoscope(
-            birth_profile_id
-        )
+        return await HoroscopeService(session).remove_horoscope(birth_profile_id)
     except HoroscopeNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except DataStoreError as e:

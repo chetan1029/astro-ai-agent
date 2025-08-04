@@ -37,7 +37,7 @@ async def get_astro_profile(
 
 @router.post(
     "/{birth_profile_id}",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     response_model=AstroProfileResponse,
 )
 async def set_astro_profile(
@@ -62,6 +62,7 @@ async def set_astro_profile(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
         )
+
 
 @router.delete("/{birth_profile_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_astro_profile(
