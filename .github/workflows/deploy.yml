@@ -54,8 +54,7 @@ jobs:
 
       # Authenticate Docker to Artifact Registry
       - name: Authenticate Docker
-        run: |
-          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://asia-south1-docker.pkg.dev
+        run: gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
 
       # Build & Push Docker Image (tagged with release version)
       - name: Build and Push
