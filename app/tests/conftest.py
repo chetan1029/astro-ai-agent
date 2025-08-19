@@ -15,9 +15,9 @@ def postgres_container():
 
 @pytest.fixture(scope="session")
 def test_settings(postgres_container):
-    db_url = postgres_container.get_connection_url().replace(
-        "postgresql://", "postgresql+asyncpg://"
-    )
+    # db_url = postgres_container.get_connection_url().replace(
+    #     "postgresql://", "postgresql+asyncpg://"
+    # )
     return Settings(
         postgres_user="test",  # not used, but needed for constructor
         postgres_password="test",

@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy import text
 
@@ -18,5 +16,5 @@ async def health_check_db(session: get_session = Depends(get_session)):
     try:
         await session.execute(text("SELECT 1"))
         return {"status": "healthy", "database": "connected"}
-    except Exception as e:
+    except Exception as _:
         raise HTTPException(status_code=503, detail="Database connection failed")

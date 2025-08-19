@@ -32,7 +32,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 async def init_db() -> None:
     async with get_engine().begin() as conn:
-        from app.src.birthprofile.datastore.dbmodels import BirthProfile
-        from app.src.astroprofile.datastore.dbmodel import AstroProfile
+        from app.src.birthprofile.datastore.dbmodels import BirthProfile # noqa: F401
+        from app.src.astroprofile.datastore.dbmodel import AstroProfile # noqa: F401
 
         await conn.run_sync(SQLModel.metadata.create_all)

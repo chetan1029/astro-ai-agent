@@ -4,7 +4,6 @@ from fastapi import FastAPI
 
 from app.src.api.v1.router import router
 from app.src.core.db import init_db
-from app.src.core.logger import logger
 
 
 @asynccontextmanager

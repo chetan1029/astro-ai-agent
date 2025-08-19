@@ -62,7 +62,7 @@ class BirthProfileImplementation(BirthProfileDataStore):
 
         except ValidationError as error:
             logger.exception(
-                "Validation error while fetching birth profile with ID".format(
+                "Validation error while fetching birth profile with ID {}".format(
                     birth_profile_id
                 )
             )
