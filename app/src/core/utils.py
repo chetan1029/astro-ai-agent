@@ -8,7 +8,8 @@ from datetime import datetime
 from app.src.core.config import get_settings
 
 
-GOOGLE_API_KEY = get_settings().google_api_key
+def get_google_api_key() -> str:
+    return get_settings().google_api_key
 
 
 def convert_to_utc(dob_local: datetime, lat: float, lon: float) -> datetime:
@@ -21,7 +22,7 @@ def convert_to_utc(dob_local: datetime, lat: float, lon: float) -> datetime:
 
 def get_lat_long_by_address(address: str) -> Tuple[str, float, float]:
     try:
-        geolocator = GoogleV3(api_key=GOOGLE_API_KEY, timeout=10)
+        geolocator = GoogleV3(api_key=get_google_api_key(), timeout=10)
         location = geolocator.geocode(address)
         if location:
             return location.address, location.latitude, location.longitude

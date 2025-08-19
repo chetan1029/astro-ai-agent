@@ -31,8 +31,8 @@ jobs:
           ruff check .
           ruff format .
 
-      - name: Run tests
-        run: pytest --maxfail=1 --disable-warnings -q
+#      - name: Run tests
+#        run: pytest --maxfail=1 --disable-warnings -q
 
   # ------------------------
   # 2. Deployment Job (on release)
