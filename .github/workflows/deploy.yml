@@ -60,7 +60,7 @@ jobs:
       - name: Build and Push
         run: |
           VERSION=${{ github.event.release.tag_name }}
-          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/my-service:$VERSION"
+          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/astro-ai-repo/my-service:$VERSION"
           docker build -t $IMAGE .
           docker push $IMAGE
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
