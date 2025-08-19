@@ -54,7 +54,7 @@ jobs:
 
       # Configure Docker to push to Artifact Registry
       - name: Configure Docker
-        run: gcloud auth configure-docker europe-north1-docker.pkg.dev
+        run: gcloud auth configure-docker asia-south1-docker.pkg.dev
 
       # Build & Push Docker Image (tagged with release version)
       - name: Build and Push
