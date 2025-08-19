@@ -20,7 +20,7 @@ def get_engine():
     global _engine
     if _engine is None:
         settings = get_settings()
-        _engine = create_async_engine(settings.database_url, echo=True, future=True)
+        _engine = create_async_engine(settings.database_url, echo=settings.app_env == "development", future=True)
     return _engine
 
 

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class AstroProfileImplementation(AstroProfileDataStore):
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         logger.info(f"Initializing AstroProfileImplementation with session {session}")
         self.session = session
 
@@ -43,13 +43,18 @@ class AstroProfileImplementation(AstroProfileDataStore):
             return AstroProfileResponse.model_validate(astro_profile_db)
 
         except IntegrityError as db_error:
-            logger.exception("Astro Profile already exists with profile id {}".format(birth_profile_id))
-            await self.session.rollback()
-            raise AstroProfileAlreadyExistsError(
-                "Astro profile already exists with profile id {}".format(
-                    birth_profile_id
-                )
-            ) from db_error
+            if "uq_astro_profile_entry" in str(db_error.orig):
+                logger.exception("Astro Profile already exists with profile id {}".format(birth_profile_id))
+                await self.session.rollback()
+                raise AstroProfileAlreadyExistsError(
+                    "Astro profile already exists with profile id {}".format(
+                        birth_profile_id
+                    )
+                ) from db_error
+            else:
+                logger.exception("Integrity error occurred...")
+                await self.session.rollback()
+                raise DataStoreError("DB constraint violation") from db_error
 
         except SQLAlchemyError as db_error:
             logger.exception("Database error occurred while creating astro profile")
@@ -80,7 +85,6 @@ class AstroProfileImplementation(AstroProfileDataStore):
                     birth_profile_id
                 )
             )
-            await self.session.rollback()
             raise DataStoreError("Failed to fetch astro profile") from db_error
 
         except ValidationError as e:

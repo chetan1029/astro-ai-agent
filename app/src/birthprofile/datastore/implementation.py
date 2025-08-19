@@ -57,7 +57,7 @@ class BirthProfileImplementation(BirthProfileDataStore):
                     birth_profile_id
                 )
             )
-            await self.session.rollback()
+            #await self.session.rollback()
             raise DataStoreError("Failed to fetch birth profile") from db_error
 
         except ValidationError as error:
