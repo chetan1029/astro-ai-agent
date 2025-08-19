@@ -52,9 +52,10 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      # Configure Docker to push to Artifact Registry
-      - name: Configure Docker
-        run: gcloud auth configure-docker asia-south1-docker.pkg.dev
+      # Authenticate Docker to Artifact Registry
+      - name: Authenticate Docker
+        run: |
+          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://asia-south1-docker.pkg.dev
 
       # Build & Push Docker Image (tagged with release version)
       - name: Build and Push
@@ -65,7 +66,7 @@ jobs:
           docker push $IMAGE
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      # Deploy to Cloud Run (no secrets, reuse existing service config)
+      # Deploy to Cloud Run
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy my-service \
