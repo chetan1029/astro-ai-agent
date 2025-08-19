@@ -54,25 +54,22 @@ jobs:
 
       # Configure Docker to push to Artifact Registry
       - name: Configure Docker
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+        run: gcloud auth configure-docker europe-north1-docker.pkg.dev
 
       # Build & Push Docker Image (tagged with release version)
       - name: Build and Push
         run: |
           VERSION=${{ github.event.release.tag_name }}
-          IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/my-service:$VERSION"
+          IMAGE="europe-north1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/my-service:$VERSION"
           docker build -t $IMAGE .
           docker push $IMAGE
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      # Deploy to GKE
-      - name: Set up GKE credentials
-        uses: google-github-actions/get-gke-credentials@v2
-        with:
-          cluster_name: my-gke-cluster
-          location: us-central1
-
-      - name: Deploy to GKE
+      # Deploy to Cloud Run (no secrets, reuse existing service config)
+      - name: Deploy to Cloud Run
         run: |
-          kubectl set image deployment/my-deployment my-container=$IMAGE
-          kubectl rollout status deployment/my-deployment
+          gcloud run deploy my-service \
+            --image $IMAGE \
+            --region europe-north1 \
+            --platform managed \
+            --allow-unauthenticated
