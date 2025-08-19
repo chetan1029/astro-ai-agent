@@ -20,7 +20,9 @@ def get_engine():
     global _engine
     if _engine is None:
         settings = get_settings()
-        _engine = create_async_engine(settings.database_url, echo=settings.app_env == "development", future=True)
+        _engine = create_async_engine(
+            settings.database_url, echo=settings.app_env == "development", future=True
+        )
     return _engine
 
 
@@ -32,7 +34,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 async def init_db() -> None:
     async with get_engine().begin() as conn:
-        from app.src.birthprofile.datastore.dbmodels import BirthProfile # noqa: F401
-        from app.src.astroprofile.datastore.dbmodel import AstroProfile # noqa: F401
+        from app.src.birthprofile.datastore.dbmodels import BirthProfile  # noqa: F401
+        from app.src.astroprofile.datastore.dbmodel import AstroProfile  # noqa: F401
 
         await conn.run_sync(SQLModel.metadata.create_all)

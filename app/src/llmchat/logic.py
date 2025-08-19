@@ -2,8 +2,14 @@ from datetime import date
 
 from app.src.astroprofile.models import AstroProfileResponse
 from app.src.birthprofile.models import BirthProfileResponse
-from app.src.llmchat.user_prompt import generate_user_interpretation_prompt, generate_user_horoscope_prompt
-from app.src.llmchat.system_prompt import generate_system_interpretation_prompt, generate_system_horoscope_prompt
+from app.src.llmchat.user_prompt import (
+    generate_user_interpretation_prompt,
+    generate_user_horoscope_prompt,
+)
+from app.src.llmchat.system_prompt import (
+    generate_system_interpretation_prompt,
+    generate_system_horoscope_prompt,
+)
 from app.src.llmchat.providers.anyllm_provider import AnyllmProvider
 
 
@@ -29,7 +35,10 @@ class LLMChatLogic:
         return response
 
     async def generate_astro_horoscope(
-        self, today_date: date, birth_profile: BirthProfileResponse, astro_profile: AstroProfileResponse
+        self,
+        today_date: date,
+        birth_profile: BirthProfileResponse,
+        astro_profile: AstroProfileResponse,
     ) -> str:
         system_prompt = await generate_system_horoscope_prompt()
         user_prompt = await generate_user_horoscope_prompt(

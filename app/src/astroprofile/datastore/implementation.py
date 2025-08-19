@@ -44,7 +44,11 @@ class AstroProfileImplementation(AstroProfileDataStore):
 
         except IntegrityError as db_error:
             if "uq_astro_profile_entry" in str(db_error.orig):
-                logger.exception("Astro Profile already exists with profile id {}".format(birth_profile_id))
+                logger.exception(
+                    "Astro Profile already exists with profile id {}".format(
+                        birth_profile_id
+                    )
+                )
                 await self.session.rollback()
                 raise AstroProfileAlreadyExistsError(
                     "Astro profile already exists with profile id {}".format(
@@ -60,7 +64,6 @@ class AstroProfileImplementation(AstroProfileDataStore):
             logger.exception("Database error occurred while creating astro profile")
             await self.session.rollback()
             raise DataStoreError("Failed to create astro profile") from db_error
-
 
     async def fetch_astro_profile(
         self, birth_profile_id: uuid.UUID

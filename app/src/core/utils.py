@@ -10,6 +10,7 @@ from app.src.core.config import get_settings
 
 GOOGLE_API_KEY = get_settings().google_api_key
 
+
 def convert_to_utc(dob_local: datetime, lat: float, lon: float) -> datetime:
     tf = TimezoneFinder()
     tz_str = tf.timezone_at(lat=lat, lng=lon)

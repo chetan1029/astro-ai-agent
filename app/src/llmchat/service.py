@@ -20,7 +20,10 @@ class LLMChatService:
         return astro_interpretation
 
     async def get_astro_horoscope(
-        self, today_date: date, birth_profile: BirthProfileResponse, astro_profile: AstroProfileResponse
+        self,
+        today_date: date,
+        birth_profile: BirthProfileResponse,
+        astro_profile: AstroProfileResponse,
     ) -> str:
         astro_horoscope = await self.logic.generate_astro_horoscope(
             today_date, birth_profile, astro_profile

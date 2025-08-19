@@ -13,8 +13,10 @@ class AstroProfile(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class AstroProfileCreate(AstroProfile):
     pass
+
 
 class AstroProfileResponse(AstroProfile):
     pass

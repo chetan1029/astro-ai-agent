@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 class AstroProfileLogic:
-
     async def get_astro_profile(
         self,
         date_of_birth_utc: datetime,

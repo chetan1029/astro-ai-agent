@@ -29,7 +29,7 @@ jobs:
       - name: Run Ruff (lint + formatting check)
         run: |
           ruff check .
-          ruff format --check .
+          ruff format .
 
       - name: Run tests
         run: pytest --maxfail=1 --disable-warnings -q

@@ -57,7 +57,7 @@ class BirthProfileImplementation(BirthProfileDataStore):
                     birth_profile_id
                 )
             )
-            #await self.session.rollback()
+            # await self.session.rollback()
             raise DataStoreError("Failed to fetch birth profile") from db_error
 
         except ValidationError as error:
@@ -66,7 +66,9 @@ class BirthProfileImplementation(BirthProfileDataStore):
                     birth_profile_id
                 )
             )
-            raise DataStoreError("Validation error while fetching birth profile") from error
+            raise DataStoreError(
+                "Validation error while fetching birth profile"
+            ) from error
 
     async def delete_birth_profile(self, birth_profile_id: uuid.UUID) -> None:
         try:

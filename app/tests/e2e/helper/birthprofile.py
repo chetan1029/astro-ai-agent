@@ -3,12 +3,13 @@ from datetime import datetime
 
 from httpx import AsyncClient
 
+
 async def create_birth_profile(
     base_url: str,
     name: str,
     date_of_birth: datetime,
     birth_place: str,
-    relationship: str
+    relationship: str,
 ) -> uuid.UUID:
     async with AsyncClient(base_url=base_url) as client:
         response = await client.post(

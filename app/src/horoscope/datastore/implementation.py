@@ -10,7 +10,8 @@ from app.src.horoscope.datastore.dbmodel import Horoscope
 from app.src.horoscope.datastore.interface import HoroscopeDataStore
 from app.src.horoscope.exceptions import (
     HoroscopeAlreadyExistsError,
-    DataStoreError, HoroscopeNotFoundError,
+    DataStoreError,
+    HoroscopeNotFoundError,
 )
 from app.src.horoscope.models import HoroscopeCreate, HoroscopeResponse
 
@@ -32,22 +33,16 @@ class HoroscopeImplementation(HoroscopeDataStore):
             await self.session.refresh(horoscope_db)
 
             logger.info(
-                "Successfully created Horoscope with ID: {}".format(
-                    horoscope_db.id
-                )
+                "Successfully created Horoscope with ID: {}".format(horoscope_db.id)
             )
             return HoroscopeResponse.model_validate(horoscope_db)
         except IntegrityError as db_error:
             logger.exception(
-                "Horoscope already exists with profile id {}".format(
-                    birth_profile_id
-                )
+                "Horoscope already exists with profile id {}".format(birth_profile_id)
             )
             await self.session.rollback()
             raise HoroscopeAlreadyExistsError(
-                "Horoscope already exists with profile id {}".format(
-                    birth_profile_id
-                )
+                "Horoscope already exists with profile id {}".format(birth_profile_id)
             ) from db_error
 
         except SQLAlchemyError as db_error:
@@ -55,9 +50,7 @@ class HoroscopeImplementation(HoroscopeDataStore):
             await self.session.rollback()
             raise DataStoreError("Failed to create horoscope") from db_error
 
-    async def fetch_horoscope(
-        self, birth_profile_id: uuid.UUID
-    ) -> HoroscopeResponse:
+    async def fetch_horoscope(self, birth_profile_id: uuid.UUID) -> HoroscopeResponse:
         try:
             statement = select(Horoscope).where(
                 Horoscope.birth_profile_id == birth_profile_id
@@ -89,7 +82,6 @@ class HoroscopeImplementation(HoroscopeDataStore):
             )
             raise DataStoreError("Validation error while fetching horoscope") from e
 
-
     async def delete_horoscope(self, birth_profile_id: uuid.UUID) -> None:
         try:
             statement = select(Horoscope).where(
@@ -99,9 +91,7 @@ class HoroscopeImplementation(HoroscopeDataStore):
             horoscope = result.scalar_one_or_none()
             if not horoscope:
                 raise HoroscopeNotFoundError(
-                    "Horoscope not found with profile id: {}".format(
-                        birth_profile_id
-                    )
+                    "Horoscope not found with profile id: {}".format(birth_profile_id)
                 )
 
             await self.session.delete(horoscope)
@@ -118,4 +108,3 @@ class HoroscopeImplementation(HoroscopeDataStore):
             raise DataStoreError(
                 "Failed to delete astro profile with ID: {}".format(birth_profile_id)
             ) from db_error
-

@@ -10,16 +10,21 @@ from app.src.llmchat.service import LLMChatService
 
 logger = logging.getLogger(__name__)
 
+
 class InterpretationService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def set_interpretation(self, birth_profile_id: uuid.UUID, birth_profile: BirthProfileResponse, astro_profile: AstroProfileResponse) -> InterpretationResponse:
-        content = await LLMChatService().get_astro_interpretation(birth_profile, astro_profile)
-        interpretation_data = {
-            "birth_profile_id": birth_profile_id,
-            "content": content
-        }
+    async def set_interpretation(
+        self,
+        birth_profile_id: uuid.UUID,
+        birth_profile: BirthProfileResponse,
+        astro_profile: AstroProfileResponse,
+    ) -> InterpretationResponse:
+        content = await LLMChatService().get_astro_interpretation(
+            birth_profile, astro_profile
+        )
+        interpretation_data = {"birth_profile_id": birth_profile_id, "content": content}
 
         interpretation_model = InterpretationCreate.model_validate(interpretation_data)
         interpretation_created = await InterpretationImplementation(
@@ -35,7 +40,9 @@ class InterpretationService:
         )
         return interpretation_created
 
-    async def get_interpretation(self, birth_profile_id: uuid.UUID) -> InterpretationResponse:
+    async def get_interpretation(
+        self, birth_profile_id: uuid.UUID
+    ) -> InterpretationResponse:
         interpretation = await InterpretationImplementation(
             self.session
         ).fetch_interpretation(birth_profile_id)

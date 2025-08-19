@@ -17,10 +17,7 @@ class Settings(BaseSettings):
     anyllm_provider: str
     anyllm_model: str
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     @property
     def database_url(self) -> str:
