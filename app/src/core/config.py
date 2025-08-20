@@ -21,7 +21,12 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.database_host}:{self.database_port}/{self.postgres_db}"
+        if self.database_host.startswith("/cloudsql/"):
+            # For asyncpg, use host only (no port)
+            return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.database_host}/{self.postgres_db}"
+        else:
+            # Standard TCP connection
+            return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.database_host}:{self.database_port}/{self.postgres_db}"
 
     @property
     def anyllm_model_url(self) -> str:
