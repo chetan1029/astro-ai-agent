@@ -1,5 +1,9 @@
 name: CI/CD Pipeline
 
+env:
+  SERVICE_NAME: astro-ai-agent-service
+  PROJECT_ID: astro-ai-agent
+
 on:
   pull_request:
     branches: [ "main" ]   # Run CI for PRs to main
@@ -42,25 +46,26 @@ jobs:
     needs: lint-test
     if: github.event_name == 'release'
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # Authenticate with GCP
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+      - name: Google Cloud Auth
+        uses: 'google-github-actions/auth@v2'
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          project_id: ${{ env.PROJECT_ID }}
 
-      # Authenticate Docker to Artifact Registry
-      - name: Authenticate Docker
-        run: gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
 
-      # Build & Push Docker Image (tagged with release version)
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker asia-south1-docker.pkg.dev
+
       - name: Build and Push
         run: |
           VERSION=${{ github.event.release.tag_name }}
-          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/astro-ai-repo/my-service:$VERSION"
+          IMAGE="asia-south1-docker.pkg.dev/${{ env.PROJECT_ID }}/astro-ai-repo/${{ env.SERVICE_NAME }}:$VERSION"
           docker build -t $IMAGE .
           docker push $IMAGE
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
