@@ -77,5 +77,6 @@ jobs:
             --image $IMAGE \
             --region asia-south1 \
             --platform managed \
+            --service-account astro-ai-github-actions@astro-ai-agent.iam.gserviceaccount.com \
             --allow-unauthenticated \
             --set-secrets "APP_NAME=APP_NAME:latest,APP_ENV=APP_ENV:latest,ADMIN_EMAIL=ADMIN_EMAIL:latest,APP_TOKEN=APP_TOKEN:latest,POSTGRES_DB=POSTGRES_DB:latest,DATABASE_HOST=DATABASE_HOST:latest,DATABASE_PORT=DATABASE_PORT:latest,POSTGRES_USER=POSTGRES_USER:latest,POSTGRES_PASSWORD=POSTGRES_PASSWORD:latest,GOOGLE_API_KEY=GOOGLE_API_KEY:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest,ANYLLM_PROVIDER=ANYLLM_PROVIDER:latest,ANYLLM_MODEL=ANYLLM_MODEL:latest"
