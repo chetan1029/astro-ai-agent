@@ -61,12 +61,12 @@ jobs:
       - name: Install GKE auth plugin
         run: |
           sudo apt-get update
-          sudo apt-get install -y google-cloud-gke-gcloud-auth-plugin
-          gcloud components update
+          sudo apt-get install -y gke-gcloud-auth-plugin
 
       # Step 3: Authenticate kubectl with GKE
       - name: Get GKE credentials
         run: |
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
           gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} \
             --zone ${{ secrets.GKE_ZONE }} \
             --project ${{ secrets.GCP_PROJECT_ID }}
