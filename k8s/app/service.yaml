@@ -3,11 +3,10 @@ kind: Service
 metadata:
   name: astro-agent-service
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: astro-agent
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8000
-      nodePort: 30080
+      targetPort: 8080
