@@ -63,7 +63,14 @@ jobs:
           export_default_credentials: true
           install_components: gke-gcloud-auth-plugin
 
-      # Step 3: Authenticate kubectl with GKE
+      # Step 3: Build & Push Docker image to Artifact Registry
+      - name: Build & push Docker image
+        run: |
+          TAG=${{ github.event.release.tag_name }}
+          echo "Building image with tag $TAG..."
+          gcloud builds submit --tag "${{ secrets.GKE_ZONE }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/astro-ai-agent-repo/astro-ai-agent-app:$TAG" .
+
+      # Step 4: Authenticate kubectl with GKE
       - name: Get GKE credentials
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
@@ -71,17 +78,19 @@ jobs:
             --zone ${{ secrets.GKE_ZONE }} \
             --project ${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 4: Set namespace (optional)
+      # Step 5: Set namespace (optional)
       - name: Create namespace if not exists
         run: |
           kubectl get ns ${{ secrets.K8S_NAMESPACE }} || kubectl create ns ${{ secrets.K8S_NAMESPACE }}
-          
-      # Step 5: Build & Push Docker image to Artifact Registry
-      - name: Build & push Docker image
+
+      # Step 6: Deploy FastAPI (update image dynamically)
+      - name: Update deployment image and rollout
         run: |
           TAG=${{ github.event.release.tag_name }}
-          echo "Building image with tag $TAG..."
-          gcloud builds submit --tag "${{ secrets.GKE_ZONE }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/astro-ai-agent-repo/astro-ai-agent-app:$TAG" .
+          kubectl -n ${{ secrets.K8S_NAMESPACE }} set image deployment/astro-agent \
+            astro-agent=${{ secrets.GKE_ZONE }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/astro-ai-agent-repo/astro-ai-agent-app:$TAG
+          kubectl -n ${{ secrets.K8S_NAMESPACE }} rollout status deploy/astro-agent
+          
 
 #      # Step 5: Deploy FastAPI app
 #      - name: Deploy FastAPI
