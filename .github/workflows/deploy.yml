@@ -63,12 +63,19 @@ jobs:
           export_default_credentials: true
           install_components: gke-gcloud-auth-plugin
 
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker ${{ secrets.GKE_ZONE }}-docker.pkg.dev --quiet
+
       # Step 3: Build & Push Docker image to Artifact Registry
       - name: Build & push Docker image
         run: |
           TAG=${{ github.event.release.tag_name }}
+          IMAGE="${{ secrets.GKE_ZONE }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/astro-ai-agent-repo/astro-ai-agent-app:$TAG"
           echo "Building image with tag $TAG..."
-          gcloud builds submit --tag "${{ secrets.GKE_ZONE }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/astro-ai-agent-repo/astro-ai-agent-app:$TAG" .
+          docker build -t $IMAGE .
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
       # Step 4: Authenticate kubectl with GKE
       - name: Get GKE credentials
@@ -88,7 +95,7 @@ jobs:
         run: |
           TAG=${{ github.event.release.tag_name }}
           kubectl -n ${{ secrets.K8S_NAMESPACE }} set image deployment/astro-agent \
-            astro-agent=${{ secrets.GKE_ZONE }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/astro-ai-agent-repo/astro-ai-agent-app:$TAG
+            astro-agent=$IMAGE
           kubectl -n ${{ secrets.K8S_NAMESPACE }} rollout status deploy/astro-agent
           
 
