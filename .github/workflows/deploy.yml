@@ -57,11 +57,11 @@ jobs:
       # Step 2: Set up Google Cloud SDK
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
-
-      - name: Install GKE auth plugin
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gke-gcloud-auth-plugin
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+          install_components: gke-gcloud-auth-plugin
 
       # Step 3: Authenticate kubectl with GKE
       - name: Get GKE credentials
