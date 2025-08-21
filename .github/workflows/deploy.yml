@@ -42,7 +42,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: lint-test
-    if: github.event_name == 'push'
+    if: github.event_name == 'release'
     steps:
       # Step 1: Checkout the repo
       - name: Checkout repository
@@ -75,14 +75,22 @@ jobs:
       - name: Create namespace if not exists
         run: |
           kubectl get ns ${{ secrets.K8S_NAMESPACE }} || kubectl create ns ${{ secrets.K8S_NAMESPACE }}
-
-      # Step 5: Deploy FastAPI app
-      - name: Deploy FastAPI
+          
+      # Step 5: Build & Push Docker image to Artifact Registry
+      - name: Build & push Docker image
         run: |
-          kubectl -n ${{ secrets.K8S_NAMESPACE }} apply -f k8s/app/deployment.yaml
-          kubectl -n ${{ secrets.K8S_NAMESPACE }} apply -f k8s/app/service.yaml
+          TAG=${{ github.event.release.tag_name }}
+          echo "Building image with tag $TAG..."
+          gcloud builds submit --tag "${{ secrets.GKE_ZONE }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/astro-ai-agent-repo/astro-ai-agent-app:$TAG" .
 
-      # Step 6: Wait for rollout
-      - name: Wait for FastAPI rollout
-        run: |
-          kubectl -n ${{ secrets.K8S_NAMESPACE }} rollout status deploy/astro-agent
+#      # Step 5: Deploy FastAPI app
+#      - name: Deploy FastAPI
+#        run: |
+#          kubectl -n ${{ secrets.K8S_NAMESPACE }} apply -f k8s/app/deployment.yaml
+#          kubectl -n ${{ secrets.K8S_NAMESPACE }} apply -f k8s/app/service.yaml
+
+
+#      # Step 6: Wait for rollout
+#      - name: Wait for FastAPI rollout
+#        run: |
+#          kubectl -n ${{ secrets.K8S_NAMESPACE }} rollout status deploy/astro-agent
