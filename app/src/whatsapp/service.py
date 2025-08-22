@@ -1,4 +1,4 @@
-import os, requests
+import requests
 from datetime import datetime
 from app.src.birthprofile.models import BirthProfileCreate, Relationship
 from app.src.core.config import get_settings
