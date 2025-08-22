@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     anyllm_provider: str
     anyllm_model: str
     database_url: str
+    whatsapp_verify_token: str
+    whatsapp_access_token: str
+    whatsapp_phone_number_id: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
