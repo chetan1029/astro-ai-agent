@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: astro-agent-cert
+spec:
+  domains:
+    - astroapp.nononsensedev.com

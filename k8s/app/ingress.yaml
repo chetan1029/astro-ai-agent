@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: astro-agent-ingress
+  namespace: astro-ai-agent-ns
+  annotations:
+    networking.gke.io/managed-certificates: "astro-agent-cert"
+    ingress.gcp.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: gce
+  rules:
+    - host: astroapp.nononsensedev.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: astro-agent-service
+                port:
+                  number: 80
