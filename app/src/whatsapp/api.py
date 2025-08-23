@@ -29,19 +29,24 @@ async def receive_whatsapp_message(request: Request, session=Depends(get_session
     response_text = ""
 
     try:
-        msg = data["entry"][0]["changes"][0]["value"]["messages"][0]
+        change = data["entry"][0]["changes"][0]
+        value = change["value"]
+
+        msg = value["messages"][0]
         from_number = msg["from"]
         text = msg.get("text", {}).get("body", "")
 
-        # 🔹 Parse user text → BirthProfileCreate
+        contact_name = value["contacts"][0]["profile"]["name"]
+
+        # arse user text → BirthProfileCreate
         birth_profile = parse_message_to_birth_profile(text)
 
-        # 🔹 Save via BirthProfileService
+        # Save via BirthProfileService
         service = BirthProfileService(session)
         result = await service.set_birth_profile(birth_profile)
 
-        # 🔹 Send success message back
-        response_text = f"✅ Profile saved for {birth_profile.name} with id {result.id}"
+        # Send success message back
+        response_text = f"✅ Profile saved for {contact_name} {birth_profile.name} with id {result.id}"
         send_whatsapp_message(from_number, response_text)
 
     except WhatsappError as e:
