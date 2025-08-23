@@ -11,6 +11,11 @@ async def health_check():
     return {"status": "healthy"}
 
 
+@router.get("/healthcheck", status_code=status.HTTP_200_OK)
+async def health_check_in():
+    return {"status": "healthy"}
+
+
 @router.get("/healthcheck/db", status_code=status.HTTP_200_OK)
 async def health_check_db(session: get_session = Depends(get_session)):
     try:
