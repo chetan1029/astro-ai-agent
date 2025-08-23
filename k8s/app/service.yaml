@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: astro-agent-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: astro-agent
   ports:

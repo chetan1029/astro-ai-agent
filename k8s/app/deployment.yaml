@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: astro-agent
-          image: asia-south1-docker.pkg.dev/astro-ai-agent-1/astro-ai-agent-repo/astro-ai-agent-app:v1
+          image: asia-south1-docker.pkg.dev/astro-ai-agent-1/astro-ai-agent-repo/astro-ai-agent-app:v1 # we will override this in github actionwith latest version
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

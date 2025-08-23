@@ -25,5 +25,5 @@ router.include_router(
 router.include_router(
     whatsapp_router, prefix="/whatsapp", tags=["WhatsApp"]
 )
-router.include_router(healthcheck_router, prefix="/healthcheck", tags=["HealthCheck"])
+router.include_router(healthcheck_router, prefix="", tags=["HealthCheck"])
 
