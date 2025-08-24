@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str
     whatsapp_access_token: str
     whatsapp_phone_number_id: str
+    twilio_account_sid: str
+    twilio_auth_token: str
+    twilio_whatsapp_number: str
+    whatsapp_provider: str  # twilio, cloud
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

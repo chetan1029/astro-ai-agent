@@ -7,23 +7,6 @@ ACCESS_TOKEN = get_settings().whatsapp_access_token
 PHONE_NUMBER_ID = get_settings().whatsapp_phone_number_id
 
 
-def send_whatsapp_message(to: str, message: str):
-    """Send message back to user via WhatsApp Cloud API"""
-    url = f"https://graph.facebook.com/v17.0/{PHONE_NUMBER_ID}/messages"
-    headers = {
-        "Authorization": f"Bearer {ACCESS_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "messaging_product": "whatsapp",
-        "to": to,
-        "type": "text",
-        "text": {"body": message}
-    }
-    r = requests.post(url, headers=headers, json=payload)
-    print("WhatsApp send response:", r.json())
-
-
 def parse_message_to_birth_profile(text: str) -> BirthProfileCreate:
     """
     Parse a simple comma-separated message into BirthProfileCreate.
