@@ -3,6 +3,8 @@ from fastapi.responses import PlainTextResponse
 
 from app.src.birthprofile.service import BirthProfileService
 from app.src.core.db import get_session
+from app.src.core.utils import normalize_phone_number
+from app.src.userprofile.service import UserProfileService
 from app.src.whatsapp.dependencies import get_messaging_provider
 from app.src.whatsapp.exceptions import WhatsappError
 from app.src.whatsapp.providers.base import MessagingProvider
@@ -44,8 +46,12 @@ async def receive_whatsapp_message(
 
     try:
         birth_profile = parse_message_to_birth_profile(text)
-        service = BirthProfileService(session)
-        result = await service.set_birth_profile(birth_profile)
+
+        user_profile = await UserProfileService(session).get_or_set_by_phone(normalize_phone_number(from_number))
+
+        birth_profile.user_profile_id = user_profile.id
+
+        result = await BirthProfileService(session).set_birth_profile(birth_profile)
 
         response_text = f"✅ Profile saved for {contact_name} {birth_profile.name} with id {result.id}"
         messaging.send_message(from_number, response_text)

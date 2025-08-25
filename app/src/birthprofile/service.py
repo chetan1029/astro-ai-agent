@@ -1,5 +1,6 @@
 import uuid
 import logging
+from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,6 +31,19 @@ class BirthProfileService:
             },
         )
         return birth_profile
+
+    async def get_all_birth_profiles(self, phone_number: str) -> List[BirthProfileResponse]:
+        birth_profiles = await BirthProfileImplementation(self.session).fetch_all_birth_profiles(phone_number)
+        logger.info(
+            "Getting all birth profiles",
+            extra={
+                "extra_info": {
+                    "phone_number": phone_number,
+                    "birth_profiles": birth_profiles,
+                }
+            }
+        )
+        return birth_profiles
 
     async def set_birth_profile(
         self, birth_profile: BirthProfileCreate

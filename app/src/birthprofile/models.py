@@ -31,6 +31,7 @@ class BirthProfile(BaseModel):
     relationship: Relationship
     birth_place_latitude: Latitude | None = None
     birth_place_longitude: Longitude | None = None
+    user_profile_id: uuid.UUID | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

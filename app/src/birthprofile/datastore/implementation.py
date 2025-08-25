@@ -1,14 +1,17 @@
 import uuid
 import logging
+from typing import List
 
 from pydantic import ValidationError
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 from app.src.birthprofile.datastore.dbmodels import BirthProfile
 from app.src.birthprofile.datastore.interface import BirthProfileDataStore
-from app.src.birthprofile.exceptions import BirthProfileNotFoundError, DataStoreError
+from app.src.birthprofile.exceptions import BirthProfileNotFoundError, DataStoreError, BirthProfileAlreadyExistsError
 from app.src.birthprofile.models import BirthProfileCreate, BirthProfileResponse
+from app.src.userprofile.datastore.dbmodels import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +37,15 @@ class BirthProfileImplementation(BirthProfileDataStore):
             )
             return BirthProfileResponse.model_validate(birth_profile_db)
 
+        except IntegrityError as db_error:
+            logger.exception(
+                "Birth Profile already exists with birth date,time {}".format(birth_profile.date_of_birth)
+            )
+            await self.session.rollback()
+            raise BirthProfileAlreadyExistsError(
+                "Birth Profile already exists with birth date,time {}".format(birth_profile.date_of_birth)
+            ) from db_error
+
         except SQLAlchemyError as db_error:
             logger.exception("Database error occurred while creating birth profile")
             await self.session.rollback()
@@ -57,7 +69,6 @@ class BirthProfileImplementation(BirthProfileDataStore):
                     birth_profile_id
                 )
             )
-            # await self.session.rollback()
             raise DataStoreError("Failed to fetch birth profile") from db_error
 
         except ValidationError as error:
@@ -69,6 +80,24 @@ class BirthProfileImplementation(BirthProfileDataStore):
             raise DataStoreError(
                 "Validation error while fetching birth profile"
             ) from error
+
+    async def fetch_all_birth_profiles(self, phone_number:str) -> List[BirthProfileResponse]:
+        try:
+            query = (
+                select(BirthProfile)
+                .join(UserProfile, BirthProfile.user_profile_id == UserProfile.id)
+                .where(UserProfile.phone_number == phone_number)
+            )
+
+            result = await self.session.execute(query)
+            birth_profiles = result.scalars().all()
+            return [BirthProfileResponse.model_validate(bp) for bp in birth_profiles]
+        except SQLAlchemyError as db_error:
+            logger.exception(
+                f"Database error while fetching birth profiles for {phone_number}",
+                exc_info=db_error,
+            )
+            raise DataStoreError("Failed to fetch birth profiles") from db_error
 
     async def delete_birth_profile(self, birth_profile_id: uuid.UUID) -> None:
         try:
