@@ -6,13 +6,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.src.birthprofile.datastore.implementation import BirthProfileImplementation
 from app.src.birthprofile.models import BirthProfileResponse, BirthProfileCreate
+from app.src.core.pubsub.publisher import PubSubPublisher
+from app.src.core.config import get_settings
 
 logger = logging.getLogger(__name__)
+settings = get_settings()
 
 
 class BirthProfileService:
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, publisher: PubSubPublisher = PubSubPublisher()):
         self.session = session
+        self.publisher = publisher
 
     async def get_birth_profile(
         self, birth_profile_id: uuid.UUID
@@ -51,6 +55,15 @@ class BirthProfileService:
         birth_profile_created = await BirthProfileImplementation(
             self.session
         ).create_birth_profile(birth_profile)
+
+        birth_profile_id = birth_profile_created.id
+
+        # Publish event (delegated to PubSubPublisher)
+        self.publisher.publish(
+            settings.topic_birth_profile,
+            {"birth_id": str(birth_profile_id)}
+        )
+
         logger.info(
             "Setting birth profile",
             extra={

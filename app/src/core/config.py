@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
-
+from typing import Dict, List
 
 class Settings(BaseSettings):
     app_name: str
@@ -25,8 +25,22 @@ class Settings(BaseSettings):
     twilio_whatsapp_number: str
     whatsapp_provider: str  # twilio, cloud
 
+    # Pub/Sub config
+    pubsub_project_id: str
+    topic_birth_profile: str
+    sub_astro_profile: str
+    topic_astro_profile: str
+    sub_interpretation: str
+    sub_horoscope: str
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
+    @property
+    def topic_sub_mapping(self) -> Dict[str, List[str]]:
+        return {
+            self.topic_birth_profile: [self.sub_astro_profile],
+            self.topic_astro_profile: [self.sub_interpretation, self.sub_horoscope],
+        }
 
     @property
     def anyllm_model_url(self) -> str:

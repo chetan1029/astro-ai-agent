@@ -8,8 +8,14 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    environment:
+      PUBSUB_EMULATOR_HOST: pubsub:8085
+      PUBSUB_PROJECT_ID: local-project
     depends_on:
       - postgres
+      - pubsub
+    volumes:
+      - .:/app       # 👈 Mount local source into container
     restart: unless-stopped
 
   postgres:
@@ -23,6 +29,64 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
+    container_name: pubsub
+    command: >
+      gcloud beta emulators pubsub start
+      --project=local-project
+      --host-port=0.0.0.0:8085
+    ports:
+      - "8085:8085"
+
+  astro-worker:
+    build: .
+    container_name: astro-worker
+    env_file:
+      - .env
+    environment:
+      PUBSUB_EMULATOR_HOST: pubsub:8085
+      PUBSUB_PROJECT_ID: local-project
+    depends_on:
+      - postgres
+      - pubsub
+    volumes:
+      - .:/app
+    command: python app/workers/astro_profile_worker.py
+    restart: unless-stopped
+
+  interpretation-worker:
+    build: .
+    container_name: interpretation-worker
+    env_file:
+      - .env
+    environment:
+      PUBSUB_EMULATOR_HOST: pubsub:8085
+      PUBSUB_PROJECT_ID: local-project
+    depends_on:
+      - postgres
+      - pubsub
+    volumes:
+      - .:/app
+    command: python app/workers/interpretation_worker.py
+    restart: unless-stopped
+
+  horoscope-worker:
+    build: .
+    container_name: horoscope-worker
+    env_file:
+      - .env
+    environment:
+      PUBSUB_EMULATOR_HOST: pubsub:8085
+      PUBSUB_PROJECT_ID: local-project
+    depends_on:
+      - postgres
+      - pubsub
+    volumes:
+      - .:/app
+    command: python app/workers/horoscope_worker.py
     restart: unless-stopped
 
 volumes:

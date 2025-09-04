@@ -8,4 +8,4 @@ spec:
   resources:
     requests:
       storage: 5Gi   # pick size you need, min 1Gi
-  storageClassName: standard-rwo
+  storageClassName: standard
