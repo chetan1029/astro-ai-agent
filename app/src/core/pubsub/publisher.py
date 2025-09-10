@@ -6,6 +6,7 @@ from app.src.core.config import get_settings
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
+
 class PubSubPublisher:
     def __init__(self):
         self.publisher = pubsub_v1.PublisherClient()

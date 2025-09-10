@@ -1,14 +1,10 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import PlainTextResponse
 
-from app.src.birthprofile.service import BirthProfileService
 from app.src.core.db import get_session
-from app.src.core.utils import normalize_phone_number
-from app.src.userprofile.service import UserProfileService
 from app.src.whatsapp.dependencies import get_messaging_provider
-from app.src.whatsapp.exceptions import WhatsappError
 from app.src.whatsapp.providers.base import MessagingProvider
-from app.src.whatsapp.service import parse_message_to_birth_profile
+from app.src.whatsapp.service import WhatsAppService
 from app.src.core.config import get_settings
 
 router = APIRouter()
@@ -20,7 +16,10 @@ async def verify_webhook(request: Request):
     hub_verify_token = request.query_params.get("hub.verify_token")
     hub_challenge = request.query_params.get("hub.challenge")
 
-    if hub_mode == "subscribe" and hub_verify_token == get_settings().whatsapp_verify_token:
+    if (
+        hub_mode == "subscribe"
+        and hub_verify_token == get_settings().whatsapp_verify_token
+    ):
         return PlainTextResponse(content=hub_challenge, status_code=200)
     return PlainTextResponse(content="Verification failed", status_code=403)
 
@@ -29,7 +28,7 @@ async def verify_webhook(request: Request):
 async def receive_whatsapp_message(
     request: Request,
     session=Depends(get_session),
-    messaging: MessagingProvider = Depends(get_messaging_provider)
+    messaging: MessagingProvider = Depends(get_messaging_provider),
 ):
     provider = get_settings().whatsapp_provider
 
@@ -42,27 +41,7 @@ async def receive_whatsapp_message(
 
     print("Incoming:", data)
     from_number, text, contact_name = messaging.parse_incoming(data)
-    response_text = ""
-
-    try:
-        birth_profile = parse_message_to_birth_profile(text)
-
-        user_profile = await UserProfileService(session).get_or_set_by_phone(normalize_phone_number(from_number))
-
-        birth_profile.user_profile_id = user_profile.id
-
-        result = await BirthProfileService(session).set_birth_profile(birth_profile)
-
-        response_text = f"✅ Profile saved for {contact_name} {birth_profile.name} with id {result.id}"
-        messaging.send_message(from_number, response_text)
-
-    except WhatsappError as e:
-        print("Error:", e)
-        if from_number:
-            messaging.send_message(
-                from_number,
-                "⚠️ Sorry, could not process your message. Please use format:\n\n"
-                "Name, DOB (YYYY-MM-DD HH:MM), Place, Relationship"
-            )
-
+    response_text = await WhatsAppService(session, messaging).handle_incoming_message(
+        from_number, text, contact_name
+    )
     return {"status": f"received {response_text}"}

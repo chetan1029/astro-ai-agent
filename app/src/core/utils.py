@@ -30,6 +30,7 @@ def get_lat_long_by_address(address: str) -> Tuple[str, float, float]:
     except GeocoderServiceError as e:
         raise RuntimeError(f"Geocoding service failed: {e}")
 
+
 def normalize_phone_number(phone: str) -> str:
     """
     Normalize phone numbers to E.164 format.
@@ -37,7 +38,7 @@ def normalize_phone_number(phone: str) -> str:
     Example: 'whatsapp: 46767062804' -> '+46767062804'
     """
     if phone.startswith("whatsapp:"):
-        phone = phone[len("whatsapp:"):].strip()  # remove prefix and whitespace
+        phone = phone[len("whatsapp:") :].strip()  # remove prefix and whitespace
     if not phone.startswith("+"):
         phone = f"+{phone}"
     return phone

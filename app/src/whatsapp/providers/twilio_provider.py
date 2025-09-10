@@ -2,23 +2,19 @@ from twilio.rest import Client
 from .base import MessagingProvider
 from app.src.core.config import get_settings
 
+
 class TwilioProvider(MessagingProvider):
     def __init__(self):
         settings = get_settings()
-        self.client = Client(
-            settings.twilio_account_sid,
-            settings.twilio_auth_token
-        )
+        self.client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
         self.from_number = settings.twilio_whatsapp_number  # e.g. whatsapp:+14155238886
 
     def send_message(self, to: str, message: str) -> None:
         if to.startswith("whatsapp:") and not to.startswith("whatsapp:+"):
-           to = to.replace("whatsapp: ", "whatsapp:+")
+            to = to.replace("whatsapp: ", "whatsapp:+")
 
         response = self.client.messages.create(
-            from_=self.from_number,
-            body=message,
-            to=to
+            from_=self.from_number, body=message, to=to
         )
         print("Twilio send response:", response.sid)
 

@@ -3,7 +3,11 @@ from typing import List
 
 from fastapi import APIRouter, Depends, status, HTTPException
 
-from app.src.birthprofile.exceptions import BirthProfileNotFoundError, DataStoreError, BirthProfileAlreadyExistsError
+from app.src.birthprofile.exceptions import (
+    BirthProfileNotFoundError,
+    DataStoreError,
+    BirthProfileAlreadyExistsError,
+)
 from app.src.birthprofile.models import BirthProfileResponse, BirthProfileCreate
 from app.src.birthprofile.service import BirthProfileService
 from app.src.core.db import get_session
@@ -14,7 +18,9 @@ router = APIRouter()
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def set_birth_profile(
-    phone_number: str, birth_profile: BirthProfileCreate, session: get_session = Depends(get_session)
+    phone_number: str,
+    birth_profile: BirthProfileCreate,
+    session: get_session = Depends(get_session),
 ):
     try:
         user_profile = await UserProfileService(session).get_or_set_by_phone(
@@ -46,6 +52,7 @@ async def get_all_birth_profile(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
         )
+
 
 @router.get(
     "/{birth_profile_id}",

@@ -2,6 +2,7 @@ import requests
 from app.src.core.config import get_settings
 from .base import MessagingProvider
 
+
 class WhatsAppCloudProvider(MessagingProvider):
     def __init__(self):
         settings = get_settings()
@@ -12,13 +13,13 @@ class WhatsAppCloudProvider(MessagingProvider):
         url = f"https://graph.facebook.com/v17.0/{self.phone_number_id}/messages"
         headers = {
             "Authorization": f"Bearer {self.access_token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
         payload = {
             "messaging_product": "whatsapp",
             "to": to,
             "type": "text",
-            "text": {"body": message}
+            "text": {"body": message},
         }
         r = requests.post(url, headers=headers, json=payload)
         print("WhatsApp send response:", r.json())

@@ -29,7 +29,7 @@ class AstroProfileService:
             extra={
                 "extra_info": {
                     "birth_profile_id": str(birth_profile_id),
-                    "astro_profile_data": astro_profile.model_dump_json(),
+                    # "astro_profile_data": astro_profile.model_dump_json(),
                 }
             },
         )
@@ -59,7 +59,7 @@ class AstroProfileService:
             "Setting astro profile",
             extra={
                 "extra_info": {
-                    "astro_profile_data": astro_profile_created.model_dump_json()
+                    # "astro_profile_data": astro_profile_created.model_dump_json()
                 }
             },
         )

@@ -9,7 +9,11 @@ from sqlmodel import select
 
 from app.src.birthprofile.datastore.dbmodels import BirthProfile
 from app.src.birthprofile.datastore.interface import BirthProfileDataStore
-from app.src.birthprofile.exceptions import BirthProfileNotFoundError, DataStoreError, BirthProfileAlreadyExistsError
+from app.src.birthprofile.exceptions import (
+    BirthProfileNotFoundError,
+    DataStoreError,
+    BirthProfileAlreadyExistsError,
+)
 from app.src.birthprofile.models import BirthProfileCreate, BirthProfileResponse
 from app.src.userprofile.datastore.dbmodels import UserProfile
 
@@ -39,11 +43,15 @@ class BirthProfileImplementation(BirthProfileDataStore):
 
         except IntegrityError as db_error:
             logger.exception(
-                "Birth Profile already exists with birth date,time {}".format(birth_profile.date_of_birth)
+                "Birth Profile already exists with birth date,time {}".format(
+                    birth_profile.date_of_birth
+                )
             )
             await self.session.rollback()
             raise BirthProfileAlreadyExistsError(
-                "Birth Profile already exists with birth date,time {}".format(birth_profile.date_of_birth)
+                "Birth Profile already exists with birth date,time {}".format(
+                    birth_profile.date_of_birth
+                )
             ) from db_error
 
         except SQLAlchemyError as db_error:
@@ -81,7 +89,9 @@ class BirthProfileImplementation(BirthProfileDataStore):
                 "Validation error while fetching birth profile"
             ) from error
 
-    async def fetch_all_birth_profiles(self, phone_number:str) -> List[BirthProfileResponse]:
+    async def fetch_all_birth_profiles(
+        self, phone_number: str
+    ) -> List[BirthProfileResponse]:
         try:
             query = (
                 select(BirthProfile)

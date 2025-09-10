@@ -23,11 +23,6 @@ router.include_router(
     prefix="/horoscope",
     tags=["Horoscope"],
 )
-router.include_router(
-    whatsapp_router, prefix="/whatsapp", tags=["WhatsApp"]
-)
-router.include_router(
-    userprofile_router, prefix="/user-profile", tags=["UserProfile"]
-)
+router.include_router(whatsapp_router, prefix="/whatsapp", tags=["WhatsApp"])
+router.include_router(userprofile_router, prefix="/user-profile", tags=["UserProfile"])
 router.include_router(healthcheck_router, prefix="", tags=["HealthCheck"])
-

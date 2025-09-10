@@ -14,7 +14,9 @@ settings = get_settings()
 
 
 class BirthProfileService:
-    def __init__(self, session: AsyncSession, publisher: PubSubPublisher = PubSubPublisher()):
+    def __init__(
+        self, session: AsyncSession, publisher: PubSubPublisher = PubSubPublisher()
+    ):
         self.session = session
         self.publisher = publisher
 
@@ -30,14 +32,18 @@ class BirthProfileService:
             extra={
                 "extra_info": {
                     "birth_profile_id": str(birth_profile_id),
-                    "profile_data": birth_profile.model_dump_json(),
+                    # "profile_data": birth_profile.model_dump_json(),
                 }
             },
         )
         return birth_profile
 
-    async def get_all_birth_profiles(self, phone_number: str) -> List[BirthProfileResponse]:
-        birth_profiles = await BirthProfileImplementation(self.session).fetch_all_birth_profiles(phone_number)
+    async def get_all_birth_profiles(
+        self, phone_number: str
+    ) -> List[BirthProfileResponse]:
+        birth_profiles = await BirthProfileImplementation(
+            self.session
+        ).fetch_all_birth_profiles(phone_number)
         logger.info(
             "Getting all birth profiles",
             extra={
@@ -45,7 +51,7 @@ class BirthProfileService:
                     "phone_number": phone_number,
                     "birth_profiles": birth_profiles,
                 }
-            }
+            },
         )
         return birth_profiles
 
@@ -60,8 +66,7 @@ class BirthProfileService:
 
         # Publish event (delegated to PubSubPublisher)
         self.publisher.publish(
-            settings.topic_birth_profile,
-            {"birth_id": str(birth_profile_id)}
+            settings.topic_birth_profile, {"birth_id": str(birth_profile_id)}
         )
 
         logger.info(

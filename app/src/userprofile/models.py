@@ -10,8 +10,10 @@ class UserProfile(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class UserProfileCreate(UserProfile):
     pass
+
 
 class UserProfileResponse(UserProfile):
     id: uuid.UUID

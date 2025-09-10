@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class MessagingProvider(ABC):
     """Abstract provider for WhatsApp-like messaging."""
 

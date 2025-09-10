@@ -9,7 +9,9 @@ class BirthProfileDataStore(Protocol):
         self, birth_profile: BirthProfileCreate
     ) -> BirthProfileResponse: ...
 
-    async def fetch_all_birth_profiles(self, phone_number:str) -> List[BirthProfileResponse]: ...
+    async def fetch_all_birth_profiles(
+        self, phone_number: str
+    ) -> List[BirthProfileResponse]: ...
 
     async def fetch_birth_profile(
         self, birth_profile_id: uuid.UUID

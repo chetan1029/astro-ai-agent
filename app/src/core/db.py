@@ -21,7 +21,14 @@ def get_engine():
     if _engine is None:
         settings = get_settings()
         _engine = create_async_engine(
-            settings.database_url, echo=settings.app_env == "development", future=True
+            settings.database_url,
+            echo=settings.app_env == "development",
+            future=True,
+            pool_size=10,
+            max_overflow=20,
+            pool_timeout=30,
+            pool_recycle=1800,
+            pool_pre_ping=True,
         )
     return _engine
 

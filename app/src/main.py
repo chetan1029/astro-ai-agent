@@ -15,6 +15,7 @@ async def lifespan(
     # Initialize Pub/Sub (topics & subscriptions)
     # Wrap in a thread-safe executor if it’s blocking
     import asyncio
+
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, init_pubsub)
     yield
