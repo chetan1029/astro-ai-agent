@@ -40,7 +40,7 @@ async def handle_astro_profile(data, session_maker, publisher):
                 extra={"extra_info": {"birth_profile_id": str(birth_id)}},
             )
 
-            # Optional chaining: make sure this is NOT the same topic as sub_astro_profile
+            # publish to the astro profile topic so it will fetch by connected sub
             publisher.publish(settings.topic_astro_profile, {"birth_id": str(birth_id)})
 
         except IntegrityError as e:

@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -25,13 +26,31 @@ class UserProfileService:
         )
         return user_profile_ceated
 
-    async def get_user_profile(self, phone_number: str) -> UserProfileResponse:
+    async def get_user_profile(self, user_profile_id: uuid.UUID) -> UserProfileResponse:
         user_profile = await UserProfileImplementation(self.session).fetch_user_profile(
-            phone_number
+            user_profile_id
         )
 
         logger.info(
             "Getting user profile",
+            extra={
+                "extra_info": {
+                    "user_profile_id": str(user_profile_id),
+                    "profile_data": user_profile.model_dump_json(),
+                }
+            },
+        )
+        return user_profile
+
+    async def get_user_profile_by_phone_number(
+        self, phone_number: str
+    ) -> UserProfileResponse:
+        user_profile = await UserProfileImplementation(
+            self.session
+        ).fetch_user_profile_by_phone_number(phone_number)
+
+        logger.info(
+            "Getting user profile By Phone Number",
             extra={
                 "extra_info": {
                     "phone_number": str(phone_number),
@@ -52,7 +71,7 @@ class UserProfileService:
 
     async def get_or_set_by_phone(self, phone_number: str) -> UserProfileResponse:
         try:
-            return await self.get_user_profile(phone_number)
+            return await self.get_user_profile_by_phone_number(phone_number)
         except UserProfileNotFoundError:
             user_profile = UserProfileCreate(phone_number=phone_number)
             return await self.set_user_profile(user_profile)

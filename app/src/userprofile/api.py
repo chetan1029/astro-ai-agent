@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, status, Depends, HTTPException
 
 from app.src.core.db import get_session
@@ -32,11 +34,29 @@ async def set_user_profile(
     status_code=status.HTTP_200_OK,
     response_model=UserProfileResponse,
 )
-async def get_user_profile(
+async def get_user_profile_by_phone_number(
     phone_number: str, session: get_session = Depends(get_session)
 ):
     try:
-        return await UserProfileService(session).get_user_profile(phone_number)
+        return await UserProfileService(session).get_user_profile_by_phone_number(phone_number)
+    except UserProfileNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except DataStoreError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        )
+
+@router.get(
+    "/{user_profile_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=UserProfileResponse,
+)
+async def get_user_profile(
+    user_profile_id: uuid.UUID, session: get_session = Depends(get_session)
+):
+    try:
+        return await UserProfileService(session).get_user_profile(user_profile_id)
     except UserProfileNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except DataStoreError as e:

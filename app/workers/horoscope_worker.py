@@ -41,6 +41,10 @@ async def handle_horoscope(data, session_maker, publisher):
                     }
                 },
             )
+
+            # publish to message delivery topic to fetch by whatsapp delivery sub
+            publisher.publish(settings.topic_message_delivery, {"birth_id": str(birth_id), "type": "horoscope"})
+
         except IntegrityError as e:
             # Likely duplicate or unique constraint violation from concurrent processing.
             # Treat as success to avoid redelivery loop.

@@ -9,6 +9,7 @@ async def generate_system_interpretation_prompt() -> str:
     - Avoid technical terms like "Lagna", "Dasha" unless briefly explained
     - Write as if talking to someone's parent or grandparent
     - Use short sentences and clear headings
+    - Strictly Keep it under 1200 characters
     """
 
 
@@ -20,6 +21,7 @@ async def generate_system_horoscope_prompt() -> str:
     - Give 2–3 short paragraphs
     - Use gentle language that comforts and encourages
     - Avoid technical terms or complex astrology
+    - Strictly Keep it under 1200 characters
     
     Example:
     "Today, you may feel a bit distracted. It’s a good day to stay calm and avoid overthinking. Focus on small tasks. A warm talk with a loved one can lift your spirits."

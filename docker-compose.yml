@@ -89,21 +89,21 @@ services:
     command: python app/workers/horoscope_worker.py
     restart: unless-stopped
 
-#  whatsapp-worker:
-#    build: .
-#    container_name: whatsapp-worker
-#    env_file:
-#      - .env
-#    environment:
-#      PUBSUB_EMULATOR_HOST: pubsub:8085
-#      PUBSUB_PROJECT_ID: local-project
-#    depends_on:
-#      - postgres
-#      - pubsub
-#    volumes:
-#      - .:/app
-#    command: python app/workers/whatsapp_delivery_worker.py
-#    restart: unless-stopped
+  whatsapp-worker:
+    build: .
+    container_name: whatsapp-worker
+    env_file:
+      - .env
+    environment:
+      PUBSUB_EMULATOR_HOST: pubsub:8085
+      PUBSUB_PROJECT_ID: local-project
+    depends_on:
+      - postgres
+      - pubsub
+    volumes:
+      - .:/app
+    command: python app/workers/whatsapp_delivery_worker.py
+    restart: unless-stopped
 
 volumes:
   pgdata:

@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -47,7 +48,7 @@ class UserProfileImplementation(UserProfileDataStore):
             await self.session.rollback()
             raise DataStoreError(f"Error creating user profile: {db_error}")
 
-    async def fetch_user_profile(self, phone_number: str) -> UserProfileResponse:
+    async def fetch_user_profile_by_phone_number(self, phone_number: str) -> UserProfileResponse:
         try:
             statement = select(UserProfile).where(
                 UserProfile.phone_number == phone_number
@@ -57,18 +58,39 @@ class UserProfileImplementation(UserProfileDataStore):
 
             if not userprofile:
                 raise UserProfileNotFoundError(
-                    f"User profile with id: {phone_number} not found"
+                    f"User profile with phone number: {phone_number} not found"
                 )
             return UserProfileResponse.model_validate(userprofile)
         except SQLAlchemyError as db_error:
             logger.exception(
-                f"User Profile already exists with the phone number: {phone_number}"
+                f"Database error occurred while fetching user profile with phone number: {phone_number}"
+            )
+            await self.session.rollback()
+            raise DataStoreError("Error fetching user profile with phone number") from db_error
+        except ValidationError as e:
+            logger.exception(
+                f"Validation error occurred while fetching user profile with phone number: {phone_number}"
+            )
+            raise DataStoreError("Validation error while fetching user profile with phone number") from e
+
+    async def fetch_user_profile(self, user_profile_id: uuid.UUID) -> UserProfileResponse:
+        try:
+            userprofile = await self.session.get(UserProfile, user_profile_id)
+
+            if not userprofile:
+                raise UserProfileNotFoundError(
+                    f"User profile with id: {user_profile_id} not found"
+                )
+            return UserProfileResponse.model_validate(userprofile)
+        except SQLAlchemyError as db_error:
+            logger.exception(
+                f"Database error occurred while fetching user profile with ID: {user_profile_id}"
             )
             await self.session.rollback()
             raise DataStoreError("Error fetching user profile") from db_error
         except ValidationError as e:
             logger.exception(
-                f"User Profile already exists with the phone number: {phone_number}"
+                f"Validation error occurred while fetching user profile with ID: {user_profile_id}"
             )
             raise DataStoreError("Validation error while fetching user profile") from e
 
