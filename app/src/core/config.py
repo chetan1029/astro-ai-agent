@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     sub_astro_profile: str
     topic_astro_profile: str
     sub_interpretation: str
+    topic_interpretation: str
     sub_horoscope: str
     topic_message_delivery: str
     sub_whatsapp_delivery: str
@@ -42,7 +43,8 @@ class Settings(BaseSettings):
     def topic_sub_mapping(self) -> Dict[str, List[str]]:
         return {
             self.topic_birth_profile: [self.sub_astro_profile],
-            self.topic_astro_profile: [self.sub_interpretation, self.sub_horoscope],
+            self.topic_astro_profile: [self.sub_interpretation],
+            self.topic_interpretation: [self.sub_horoscope],
             self.topic_message_delivery: [self.sub_whatsapp_delivery],
         }
 
