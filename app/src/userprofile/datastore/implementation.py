@@ -48,7 +48,9 @@ class UserProfileImplementation(UserProfileDataStore):
             await self.session.rollback()
             raise DataStoreError(f"Error creating user profile: {db_error}")
 
-    async def fetch_user_profile_by_phone_number(self, phone_number: str) -> UserProfileResponse:
+    async def fetch_user_profile_by_phone_number(
+        self, phone_number: str
+    ) -> UserProfileResponse:
         try:
             statement = select(UserProfile).where(
                 UserProfile.phone_number == phone_number
@@ -66,14 +68,20 @@ class UserProfileImplementation(UserProfileDataStore):
                 f"Database error occurred while fetching user profile with phone number: {phone_number}"
             )
             await self.session.rollback()
-            raise DataStoreError("Error fetching user profile with phone number") from db_error
+            raise DataStoreError(
+                "Error fetching user profile with phone number"
+            ) from db_error
         except ValidationError as e:
             logger.exception(
                 f"Validation error occurred while fetching user profile with phone number: {phone_number}"
             )
-            raise DataStoreError("Validation error while fetching user profile with phone number") from e
+            raise DataStoreError(
+                "Validation error while fetching user profile with phone number"
+            ) from e
 
-    async def fetch_user_profile(self, user_profile_id: uuid.UUID) -> UserProfileResponse:
+    async def fetch_user_profile(
+        self, user_profile_id: uuid.UUID
+    ) -> UserProfileResponse:
         try:
             userprofile = await self.session.get(UserProfile, user_profile_id)
 
