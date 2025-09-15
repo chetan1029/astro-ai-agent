@@ -43,12 +43,16 @@ class WhatsAppService:
                 birth_profile
             )
 
-            response_text = f"✅ Profile saved for {contact_name} {birth_profile.name} with id {result.id}"
+            response_text = (
+                f"✅ ✨ Thanks, {birth_profile.name}! "
+                f"\n We’ve received your details and are now preparing your personalized interpretation and horoscope. "
+                f"\n This may take a moment, but we’ll send your insights shortly—sit back and relax while we get everything ready for you. 🌟"
+            )
             await self.send_message(from_number, response_text)
 
             logger.info(
                 "Birth profile created via WhatsApp",
-                extra={"extra_info": birth_profile.dict()},
+                extra={"extra_info": birth_profile.dict(), "birth_id": result.id},
             )
             return response_text
 
