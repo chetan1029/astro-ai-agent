@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, status
 from fastapi.responses import PlainTextResponse
 
-from app.src.birthprofile.exceptions import BirthProfileAlreadyExistsError, DataStoreError
+from app.src.birthprofile.exceptions import (
+    BirthProfileAlreadyExistsError,
+    DataStoreError,
+)
 from app.src.core.db import get_session
 from app.src.whatsapp.dependencies import get_messaging_provider
 from app.src.whatsapp.providers.base import MessagingProvider
@@ -43,9 +46,9 @@ async def receive_whatsapp_message(
     print("Incoming:", data)
     try:
         from_number, text, contact_name = messaging.parse_incoming(data)
-        response_text = await WhatsAppService(session, messaging).handle_incoming_message(
-            from_number, text, contact_name
-        )
+        response_text = await WhatsAppService(
+            session, messaging
+        ).handle_incoming_message(from_number, text, contact_name)
         return {"status": f"received {response_text}"}
     except BirthProfileAlreadyExistsError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))

@@ -1,6 +1,4 @@
 import logging
-import asyncio
-import sys
 from google.cloud import pubsub_v1
 from app.src.core.config import get_settings
 

@@ -30,14 +30,24 @@ async def handle_interpretation(data, session_maker, publisher):
             print(f"Interpretation {interpretation} saved for birth_id: {birth_id}")
             logger.info(
                 "Interpretation generated",
-                extra={"extra_info": {"interpretation": str(interpretation), "birth_id": str(birth_id)}},
+                extra={
+                    "extra_info": {
+                        "interpretation": str(interpretation),
+                        "birth_id": str(birth_id),
+                    }
+                },
             )
 
             # publish to message delivery topic to fetch by whatsapp delivery sub
-            publisher.publish(settings.topic_message_delivery, {"birth_id": str(birth_id), "type": "interpretation"})
+            publisher.publish(
+                settings.topic_message_delivery,
+                {"birth_id": str(birth_id), "type": "interpretation"},
+            )
 
             # publish to interpration_topic so horoscope sub pickup
-            publisher.publish(settings.topic_interpretation, {"birth_id": str(birth_id)})
+            publisher.publish(
+                settings.topic_interpretation, {"birth_id": str(birth_id)}
+            )
 
         except IntegrityError as e:
             # Likely duplicate or unique constraint violation from concurrent processing.

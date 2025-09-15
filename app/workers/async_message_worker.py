@@ -11,6 +11,7 @@ from app.src.core.pubsub.publisher import PubSubPublisher
 
 AsyncHandler = Callable[[Dict[str, Any], Any, PubSubPublisher], Awaitable[None]]
 
+
 class SimpleWorker:
     def __init__(
         self,
@@ -43,11 +44,15 @@ class SimpleWorker:
             for t in pending:
                 t.cancel()
             if pending:
-                self._loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+                self._loop.run_until_complete(
+                    asyncio.gather(*pending, return_exceptions=True)
+                )
             self._loop.close()
 
     def start(self) -> None:
-        self._thread = threading.Thread(target=self._start_loop, name=f"loop:{self.subscription}", daemon=True)
+        self._thread = threading.Thread(
+            target=self._start_loop, name=f"loop:{self.subscription}", daemon=True
+        )
         self._thread.start()
 
         def on_message(message) -> None:
@@ -67,6 +72,7 @@ class SimpleWorker:
                     await self.handler(data, self._session_maker, self.publisher)
 
             fut = asyncio.run_coroutine_threadsafe(run_one(), self._loop)
+
             def done(f):
                 try:
                     f.result()
@@ -76,6 +82,7 @@ class SimpleWorker:
                         message.nack()
                     except Exception:
                         pass
+
             fut.add_done_callback(done)
 
         self._subscriber.start(on_message)

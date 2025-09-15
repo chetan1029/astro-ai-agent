@@ -38,7 +38,9 @@ async def get_user_profile_by_phone_number(
     phone_number: str, session: get_session = Depends(get_session)
 ):
     try:
-        return await UserProfileService(session).get_user_profile_by_phone_number(phone_number)
+        return await UserProfileService(session).get_user_profile_by_phone_number(
+            phone_number
+        )
     except UserProfileNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except DataStoreError as e:
@@ -46,6 +48,7 @@ async def get_user_profile_by_phone_number(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
         )
+
 
 @router.get(
     "/{user_profile_id}",
