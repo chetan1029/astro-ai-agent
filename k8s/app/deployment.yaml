@@ -15,23 +15,41 @@ spec:
       containers:
         - name: astro-agent
           image: asia-south1-docker.pkg.dev/astro-ai-agent-470310/astro-ai-agent-repo/astro-ai-agent-app:v1 # we will override this in github actionwith latest version
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:
             - secretRef:
                 name: astro-secret
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secrets/pubsub-key/key.json
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "750m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: pubsub-key
+              mountPath: /secrets/pubsub-key
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /healthcheck
               port: 8080
             initialDelaySeconds: 5
-            periodSeconds: 10
+            periodSeconds: 60
             failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /healthcheck/db
               port: 8080
             initialDelaySeconds: 10
-            periodSeconds: 20
+            periodSeconds: 120
             failureThreshold: 5
+      volumes:
+        - name: pubsub-key
+          secret:
+            secretName: pubsub-key

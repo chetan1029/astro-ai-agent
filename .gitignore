@@ -1,5 +1,7 @@
 k8s/shared/configmap.yaml
 k8s/shared/secret.yaml
+k8s/shared/astro-pubsub-sa.json
+k8s/shared/astro-secret-current.yaml
 .venv
 .venv1
 data

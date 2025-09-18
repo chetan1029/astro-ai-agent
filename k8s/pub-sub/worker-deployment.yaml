@@ -1,0 +1,163 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: astro-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: astro-worker
+  template:
+    metadata:
+      labels:
+        app: astro-worker
+    spec:
+      containers:
+        - name: astro-worker
+          image: asia-south1-docker.pkg.dev/astro-ai-agent-470310/astro-ai-agent-repo/astro-ai-agent-app:v1
+          imagePullPolicy: Always
+          command: ["python", "app/workers/astro_profile_worker.py"]
+          envFrom:
+            - secretRef:
+                name: astro-secret
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secrets/key.json
+          volumeMounts:
+            - name: pubsub-key
+              mountPath: /secrets
+              readOnly: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "250m"
+              memory: "512Mi"
+      volumes:
+        - name: pubsub-key
+          secret:
+            secretName: pubsub-key
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interpretation-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: interpretation-worker
+  template:
+    metadata:
+      labels:
+        app: interpretation-worker
+    spec:
+      containers:
+        - name: interpretation-worker
+          image: asia-south1-docker.pkg.dev/astro-ai-agent-470310/astro-ai-agent-repo/astro-ai-agent-app:v1
+          imagePullPolicy: Always
+          command: ["python", "app/workers/interpretation_worker.py"]
+          envFrom:
+            - secretRef:
+                name: astro-secret
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secrets/key.json
+          volumeMounts:
+            - name: pubsub-key
+              mountPath: /secrets
+              readOnly: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "250m"
+              memory: "512Mi"
+      volumes:
+        - name: pubsub-key
+          secret:
+            secretName: pubsub-key
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: horoscope-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: horoscope-worker
+  template:
+    metadata:
+      labels:
+        app: horoscope-worker
+    spec:
+      containers:
+        - name: horoscope-worker
+          image: asia-south1-docker.pkg.dev/astro-ai-agent-470310/astro-ai-agent-repo/astro-ai-agent-app:v1
+          imagePullPolicy: Always
+          command: ["python", "app/workers/horoscope_worker.py"]
+          envFrom:
+            - secretRef:
+                name: astro-secret
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secrets/key.json
+          volumeMounts:
+            - name: pubsub-key
+              mountPath: /secrets
+              readOnly: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "250m"
+              memory: "512Mi"
+      volumes:
+        - name: pubsub-key
+          secret:
+            secretName: pubsub-key
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whatsapp-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whatsapp-worker
+  template:
+    metadata:
+      labels:
+        app: whatsapp-worker
+    spec:
+      containers:
+        - name: whatsapp-worker
+          image: asia-south1-docker.pkg.dev/astro-ai-agent-470310/astro-ai-agent-repo/astro-ai-agent-app:v1
+          imagePullPolicy: Always
+          command: ["python", "app/workers/whatsapp_delivery_worker.py"]
+          envFrom:
+            - secretRef:
+                name: astro-secret
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secrets/key.json
+          volumeMounts:
+            - name: pubsub-key
+              mountPath: /secrets
+              readOnly: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "250m"
+              memory: "512Mi"
+      volumes:
+        - name: pubsub-key
+          secret:
+            secretName: pubsub-key
