@@ -28,6 +28,11 @@ Astro AI Agent is a FastAPI-based microservice that generates astrological profi
 
 ---
 
+## 📦 Upcoming
+- **MCP Server**
+- **Chat-Engine**
+---
+
 ## 📂 To run project on localhost 
 - **run**: skaffold dev
 
